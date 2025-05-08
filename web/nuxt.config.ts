@@ -5,7 +5,6 @@ export default defineNuxtConfig({
   imports: {
     autoImport: false,
   },
-
   devtools: { enabled: true },
   app: {
     head: {
@@ -21,6 +20,11 @@ export default defineNuxtConfig({
   router: {
     options: {
       hashMode: true,
+    },
+  },
+  runtimeConfig: {
+    public: {
+      apiBase: 'http://127.0.0.1:8090', // NUXT_PUBLIC_API_BASE=/ in production
     },
   },
   nitro: {
