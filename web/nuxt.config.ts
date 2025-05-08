@@ -1,6 +1,5 @@
 export default defineNuxtConfig({
-
-  modules: ['@vueuse/nuxt', '@pinia/nuxt', '@nuxt/eslint'],
+  modules: ['@vueuse/nuxt', '@pinia/nuxt', '@nuxt/eslint', '@nuxt/ui'],
   ssr: false,
 
   imports: {
