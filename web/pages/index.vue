@@ -16,16 +16,24 @@ onMounted(async () => {
 
 <template>
   <div>
-    <input v-model="activitiesStore.query" type="search" placeholder="Query" />
+    <UInput
+      icon="i-lucide-search"
+      size="xl"
+      variant="outline"
+      placeholder="Query"
+      class="w-full"
+      v-model="activitiesStore.query"
+    />
 
-    <article v-for="item in activitiesStore.items" :key="item.id">
-      <label>
-        <input type="checkbox" name="done" checked />
-        <NuxtLink :to="`/${item.id}`">
-          {{ item.title }}
-        </NuxtLink>
-      </label>
+    <UCard v-for="item in activitiesStore.items" :key="item.id" class="mt-4">
+      <UCheckbox>
+        <template v-slot:label>
+          <ULink :to="{ name: 'items-id', params: { id: item.id } }">
+            {{ item.title }}
+          </ULink>
+        </template>
+      </UCheckbox>
       <BaseItemComponent :item="item" is-list />
-    </article>
+    </UCard>
   </div>
 </template>

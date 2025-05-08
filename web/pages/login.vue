@@ -1,7 +1,13 @@
 <script lang="ts" setup>
 import { pb } from "~/utils/pb";
-import { onMounted } from "vue";
+import { onMounted, reactive } from "vue";
 import { navigateTo } from "#app";
+import { useToast } from "#imports";
+
+const state = reactive({
+  email: "",
+  password: "",
+});
 
 const isAuthorized = defineModel("isAuthorized", {
   type: Boolean,
@@ -15,20 +21,22 @@ function setAuthorized(value: boolean) {
   isAuthorized.value = value;
 }
 
-const onSubmit = async (e: Event) => {
-  const formData = new FormData(e.target as HTMLFormElement);
-  const email = formData.get("email")
-  const password = formData.get("password")
+const toast = useToast();
 
-  if (!email || !password) {
-    console.error("Invalid email or password");
+const onSubmit = async (e: Event) => {
+  if (!state.email || !state.password) {
+    toast.add({
+      title: "Error",
+      description: "Invalid email or password",
+      color: "error",
+    });
     return;
   }
 
   try {
     await pb
       .collection("_superusers")
-      .authWithPassword(email as string, password as string);
+      .authWithPassword(state.email, state.password);
     setAuthorized(true);
     if (pb.authStore.isValid) {
       await navigateTo({ name: "index" });
@@ -51,35 +59,15 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="grid">
-    <div></div>
-    <div v-if="!isAuthorized">
-      <form @submit.prevent=" (e) => onSubmit(e)" ref="form">
-        <fieldset>
-          <label>
-            Email
-            <input
-              name="email"
-              placeholder="Email"
-              autocomplete="email"
-            />
-          </label>
-          <label>
-            Password
-            <input
-              type="password"
-              name="password"
-              placeholder="Password"
-              autocomplete="current-password"
-            />
-          </label>
-        </fieldset>
-        <input type="submit" value="Login" />
-      </form>
-    </div>
-    <div v-else>
-      <button @click="onLogout">Logout</button>
-    </div>
-    <div></div>
-  </div>
+  <UForm :state="state" class="space-y-4" @submit="onSubmit">
+    <UFormField label="Email" name="email">
+      <UInput v-model="state.email" />
+    </UFormField>
+
+    <UFormField label="Password" name="password">
+      <UInput v-model="state.password" type="password" />
+    </UFormField>
+
+    <UButton type="submit"> Submit </UButton>
+  </UForm>
 </template>
