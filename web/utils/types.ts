@@ -4,8 +4,12 @@ export type Item = {
   content: string
   completed: string
   type: ItemType
-  frontmatter: object
+  frontmatter: Frontmatter
 }
+
+export type Frontmatter =
+  | DebtFrontmatter
+  | TrackFrontmatter
 
 export type DebtTransaction = {
   amount: number

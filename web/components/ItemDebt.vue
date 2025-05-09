@@ -1,11 +1,9 @@
-<script setup lang="ts">
+<script setup lang="ts" generic="T extends Item & { frontmatter: DebtFrontmatter }">
 import type { TableColumn } from '@nuxt/ui'
 import { type Item, type DebtFrontmatter, h, ref, computed, reactive } from '#imports'
 import { UButton } from '#components'
 
-const { item, isList } = defineProps<{ item: Item, isList?: boolean }>()
-
-const fm = item.frontmatter as DebtFrontmatter
+const { item, isList } = defineProps<{ item: T, isList?: boolean }>()
 
 type Transaction = {
   id: string
@@ -25,11 +23,11 @@ const progress = computed(() => {
 const formatCurrency = (amount: number) => {
   return new Intl.NumberFormat('ru-RU', {
     style: 'currency',
-    currency: fm.currency,
+    currency: item.frontmatter.currency,
   }).format(amount)
 }
 
-const transactions = ref<Transaction[]>(fm.transactions.map((tx) => {
+const transactions = ref<Transaction[]>(item.frontmatter.transactions.map((tx) => {
   if (tx.amount > 0) {
     total.value += tx.amount
   }
@@ -77,7 +75,7 @@ const columns: TableColumn<Transaction>[] = [
     cell: ({ row }) => {
       return new Intl.NumberFormat('ru-RU', {
         style: 'currency',
-        currency: fm.currency,
+        currency: item.frontmatter.currency,
       }).format(row.getValue('amount'))
     },
   },

@@ -1,9 +1,7 @@
-<script setup lang="ts">
+<script setup lang="ts" generic="T extends Item & { frontmatter: TrackFrontmatter }">
 import type { Item, TrackFrontmatter } from '#imports'
 
-const { item } = defineProps<{ item: Item, isList?: boolean }>()
-
-const fm = item.frontmatter as TrackFrontmatter
+const { item } = defineProps<{ item: T, isList?: boolean }>()
 </script>
 
 <template>
@@ -11,10 +9,10 @@ const fm = item.frontmatter as TrackFrontmatter
     <p>
       <ULink
         as="button"
-        :to="fm.url"
+        :to="item.frontmatter.url"
         target="_blank"
         external
-      >{{ fm.url }}</ULink>
+      >{{ item.frontmatter.url }}</ULink>
     </p>
     <UButtonGroup class="mr-2">
       <UButton
