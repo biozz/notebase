@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { onMounted, shallowRef } from 'vue'
 import { definePageMeta, getItem, transformItem, useActivitiesStore, useRoute, type Item } from '#imports'
-import { LazyBaseItem } from '#components'
+import { BaseItem } from '#components'
 
 definePageMeta({
   middleware: ['auth'],
@@ -48,7 +48,7 @@ onMounted(async () => {
       <h1 class="text-2xl font-bold mb-5">
         {{ item.title }}
       </h1>
-      <LazyBaseItem
+      <BaseItem
         :item="item"
         :is-list="false"
       />
