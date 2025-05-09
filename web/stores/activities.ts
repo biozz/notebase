@@ -5,6 +5,7 @@ import {
   type ItemType,
   shallowRef,
   watchDebounced,
+  transformItem,
 } from '#imports'
 
 export const useActivitiesStore = defineStore('activitiesStore', () => {
@@ -21,16 +22,9 @@ export const useActivitiesStore = defineStore('activitiesStore', () => {
     const result = await pb.collection('files').getFullList({
       filter: filter,
     })
-    items.value = result.map((item): Item => {
+    items.value = result.map((item) => {
       itemTypes.value.add(item.frontmatter.type)
-      return {
-        id: item.id,
-        title: item.frontmatter.title || item.frontmatter.summary,
-        content: item.content,
-        completed: item.done,
-        type: item.frontmatter.type,
-        frontmatter: item.frontmatter,
-      }
+      return transformItem(item)
     })
   }
 
