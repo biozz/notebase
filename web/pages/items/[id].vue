@@ -30,11 +30,9 @@ onMounted(async () => {
       console.error(e)
       error.value = 'Item not found'
     }
-    finally {
-      isLoading.value = false
-    }
   }
   item.value = itemToFind
+  isLoading.value = false
 })
 </script>
 
