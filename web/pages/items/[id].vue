@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { computed } from 'vue'
-import { definePageMeta, useActivitiesStore, useRoute } from '#imports'
+import { onMounted, shallowRef } from 'vue'
+import { definePageMeta, getItem, transformItem, useActivitiesStore, useRoute, type Item } from '#imports'
 import { LazyBaseItem } from '#components'
 
 definePageMeta({
@@ -9,20 +9,42 @@ definePageMeta({
 
 const route = useRoute()
 const activitiesStore = useActivitiesStore()
-const item = computed(() => {
-  if (activitiesStore.items.length === 0) {
-    // TODO: find out how to handle async here
-    activitiesStore.load()
+const item = shallowRef<Item>()
+const error = shallowRef<string>()
+
+const isLoading = shallowRef(false)
+
+onMounted(async () => {
+  if (typeof route.params.id !== 'string') {
+    error.value = 'Invalid item id'
+    return
   }
-  return activitiesStore.items.find(item => item.id === route.params.id)
+  isLoading.value = true
+  let itemToFind = activitiesStore.items.find(item => item.id === route.params.id)
+  if (!itemToFind) {
+    try {
+      const result = await getItem(route.params.id)
+      itemToFind = transformItem(result)
+    }
+    catch (e) {
+      console.error(e)
+      error.value = 'Item not found'
+    }
+    finally {
+      isLoading.value = false
+    }
+  }
+  item.value = itemToFind
 })
 </script>
 
 <template>
   <div>
     <ULink to="/">back</ULink>
-
-    <template v-if="item">
+    <template v-if="isLoading">
+      <h1>Loading...</h1>
+    </template>
+    <template v-else-if="item">
       <h1 class="text-2xl font-bold mb-5">
         {{ item.title }}
       </h1>
@@ -31,8 +53,8 @@ const item = computed(() => {
         :is-list="false"
       />
     </template>
-    <template v-else>
-      <h1>Item not found</h1>
+    <template v-else-if="error">
+      <h1>{{ error }}</h1>
     </template>
   </div>
 </template>
