@@ -17,6 +17,15 @@ export default defineNuxtConfig({
       hashMode: true,
     },
   },
+  mdc: {
+    highlight: {
+      shikiEngine: 'oniguruma',
+      theme: {
+        default: 'material-theme-palenight',
+      },
+      langs: [`js`, `ts`, `yaml`, `markdown`],
+    },
+  },
   runtimeConfig: {
     public: {
       apiBase: 'http://127.0.0.1:8090', // NUXT_PUBLIC_API_BASE=/ in production
