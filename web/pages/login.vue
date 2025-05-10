@@ -1,12 +1,15 @@
 <script lang="ts" setup>
 import { onMounted, reactive } from 'vue'
 import { navigateTo } from '#app'
-import { useToast, pb } from '#imports'
+import { useToast } from '#imports'
+import { usePocketBase } from '~/utils/pb'
 
 const state = reactive({
   email: '',
   password: '',
 })
+
+const pb = usePocketBase()
 
 const isAuthorized = defineModel('isAuthorized', {
   type: Boolean,

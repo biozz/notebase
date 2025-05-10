@@ -1,14 +1,16 @@
 import { defineStore } from 'pinia'
 import {
-  pb,
   type Item,
   type ItemType,
   shallowRef,
   transformItem,
   useFiltersStore,
 } from '#imports'
+import { usePocketBase } from '~/utils/pb'
 
 export const useActivitiesStore = defineStore('activities', () => {
+  const pb = usePocketBase()
+
   const items = shallowRef<Item[]>([])
   const itemTypes = shallowRef<Set<ItemType>>(new Set())
   const item = shallowRef<Item | undefined>(undefined)
