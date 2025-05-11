@@ -5,11 +5,12 @@ import {
   shallowRef,
   transformItem,
   useFiltersStore,
+  useNuxtApp,
 } from '#imports'
-import { usePocketBase } from '~/utils/pb'
+
 
 export const useActivitiesStore = defineStore('activities', () => {
-  const pb = usePocketBase()
+  const { $pb } = useNuxtApp()
 
   const items = shallowRef<Item[]>([])
   const itemTypes = shallowRef<Set<ItemType>>(new Set())
@@ -17,7 +18,7 @@ export const useActivitiesStore = defineStore('activities', () => {
   const filtersStore = useFiltersStore()
 
   const load = async () => {
-    const resultList = await pb.collection('files').getList(1, 20, {
+    const resultList = await $pb.client.collection('files').getList(1, 20, {
       filter: filtersStore.buildQuery(),
     })
     items.value = resultList.items.map((item) => {

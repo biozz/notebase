@@ -3,19 +3,21 @@ import { onMounted, shallowRef, ref } from 'vue'
 import type { MDCParserResult } from '@nuxtjs/mdc'
 import {
   definePageMeta,
-  getItem,
   transformItem,
   useActivitiesStore,
   useRoute,
   type Item,
   useMarkdownParser,
+  useNuxtApp,
 } from '#imports'
 import { BaseItem } from '#components'
+
+
 
 definePageMeta({
   middleware: ['auth'],
 })
-
+const { $pb } = useNuxtApp()
 const route = useRoute()
 const activitiesStore = useActivitiesStore()
 const parseMd = useMarkdownParser()
@@ -35,7 +37,7 @@ onMounted(async () => {
   let itemToFind = activitiesStore.items.find(item => item.id === route.params.id)
   if (!itemToFind) {
     try {
-      const result = await getItem(route.params.id)
+      const result = await $pb.getItem(route.params.id)
       itemToFind = transformItem(result)
     }
     catch (e) {
