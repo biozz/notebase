@@ -5,18 +5,13 @@ export default defineNuxtConfig({
     '@nuxt/eslint',
     '@nuxt/ui',
     '@nuxtjs/mdc',
+    'nuxt-auth-utils',
   ],
-  ssr: false,
   imports: {
     autoImport: false,
   },
   devtools: { enabled: true },
   css: ['~/assets/css/main.css'],
-  router: {
-    options: {
-      hashMode: true,
-    },
-  },
   mdc: {
     highlight: {
       shikiEngine: 'oniguruma',
@@ -24,11 +19,6 @@ export default defineNuxtConfig({
         default: 'material-theme-palenight',
       },
       langs: ['js', 'ts', 'yaml', 'markdown', 'json'],
-    },
-  },
-  runtimeConfig: {
-    public: {
-      apiBase: 'http://127.0.0.1:8090', // NUXT_PUBLIC_API_BASE=/ in production
     },
   },
   future: {

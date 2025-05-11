@@ -1,8 +1,3 @@
-FROM golang:1.24-alpine AS backend
-WORKDIR /app/
-COPY . .
-RUN go build -o bin/notebase .
-
 FROM node:22-alpine AS frontend
 WORKDIR /app
 RUN corepack enable

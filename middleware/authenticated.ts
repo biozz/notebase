@@ -1,8 +1,10 @@
 import { defineNuxtRouteMiddleware, navigateTo } from '#app'
-import { pb } from '#imports'
+import { useUserSession } from '#imports'
 
 export default defineNuxtRouteMiddleware(() => {
-  if (!pb.authStore.isValid) {
+  const { loggedIn } = useUserSession()
+
+  if (!loggedIn.value) {
     return navigateTo({ name: 'login' })
   }
 })

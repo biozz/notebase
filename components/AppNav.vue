@@ -17,6 +17,10 @@ const items = ref<NavigationMenuItem[]>([
       label: 'Notebase',
       to: { name: 'index' },
     },
+    {
+      label: 'Logs',
+      to: { name: 'logs' },
+    },
   ],
   [
     {

@@ -12,27 +12,13 @@ I document some of my decisions regarding this project in [docs/adrs](./docs/adr
 
 ## Development
 
-You are going to need Go (whichever version is provided in `go.mod`) and Node/pnpm.
+This project uses [bun](https://bun.sh/). You run it with `bun dev` and follow instructions in the terminal.
 
 There is an `example/` directory with a bunch of notes and a config file.
 
-```
-go run . --root=./example/notes serve
-```
+If you feel ambitious after thoroughly inspecting the source code, you can do `NOTES_ROOT=/abs/path/to/your/vault bun dev` and try it on the real data. :)
 
-If you feel ambitious after thoroughly inspecting the source code, you can do `go run . --root=/abs/path/to/your/vault serve` and try it on the real data. :)
-
-And if you do, don't forget to add `.notebase.yml` to your root. You can check out my current config in [/examples/biozz_notebase_config.yml](./examples/biozz_notebase_config.yml).
-
-`serve` command also starts a background `sync` job. `serve` will created `pb_data` directory, which should not be checked into the VCS and is meant to be disposable. That means taht if there is any error or migration conflict you delete `pb_data` and run the server again.
-
-Follow PocketBase instructions to create an account.
-
-Then you can run frontend separately (assuming you installed dependencies):
-
-```
-pnpm dev
-```
+And if you do, don't forget to add `.notebase.yml` to your root. You can check out an example config in [/examples/biozz_notebase_config.yml](./examples/biozz_notebase_config.yml).
 
 ## Contributing
 

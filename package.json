@@ -3,24 +3,29 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "NUXT_PUBLIC_API_BASE=/ nuxt build",
+    "build": "nuxt build",
     "dev": "nuxt dev",
     "generate": "nuxt generate",
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare",
     "lint": "eslint .",
-    "lint:fix": "eslint . --fix"
+    "lint:fix": "eslint . --fix",
+    "db:push": "drizzle-kit push",
+    "db:generate": "drizzle-kit generate",
+    "db:studio": "drizzle-kit studio"
   },
   "dependencies": {
     "@internationalized/date": "^3.8.0",
+    "@libsql/client": "^0.15.5",
     "@nuxt/ui": "^3.1.1",
     "@nuxtjs/mdc": "0.17.0",
     "@pinia/nuxt": "0.11.0",
     "@vueuse/core": "^13.1.0",
     "@vueuse/nuxt": "13.1.0",
+    "drizzle-orm": "^0.43.1",
     "nuxt": "^3.17.2",
+    "nuxt-auth-utils": "0.5.20",
     "pinia": "^3.0.2",
-    "pocketbase": "^0.26.0",
     "tailwindcss": "^4.1.5",
     "vue": "^3.5.13",
     "vue-router": "^4.5.1",
@@ -29,11 +34,17 @@
   "devDependencies": {
     "@nuxt/eslint": "^1.3.0",
     "@tailwindcss/typography": "^0.5.16",
+    "drizzle-kit": "^0.31.1",
     "eslint": "^9.26.0",
     "eslint-plugin-format": "^1.0.1",
-    "material-theme-palenight": "link:@shikijs/themes/material-theme-palenight",
     "shiki": "^3.4.0",
     "typescript": "^5.8.3"
   },
-  "packageManager": "pnpm@10.10.0+sha512.d615db246fe70f25dcfea6d8d73dee782ce23e2245e3c4f6f888249fb568149318637dca73c2c5c8ef2a4ca0d5657fb9567188bfab47f566d1ee6ce987815c39"
+  "trustedDependencies": [
+    "@parcel/watcher",
+    "@tailwindcss/oxide",
+    "esbuild",
+    "unrs-resolver",
+    "vue-demi"
+  ]
 }

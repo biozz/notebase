@@ -11,6 +11,12 @@ export type Frontmatter =
   | DebtFrontmatter
   | TrackFrontmatter
 
+export enum ItemType {
+  Track = 'track',
+  Debt = 'debt',
+  Task = 'task',
+}
+
 export type DebtTransaction = {
   amount: number
   created: string
@@ -27,10 +33,4 @@ export type TrackFrontmatter = {
   episode: number
   url: string
   next_episode: string
-}
-
-export enum ItemType {
-  Track = 'track',
-  Debt = 'debt',
-  Task = 'task',
 }
