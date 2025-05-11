@@ -1,7 +1,7 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "c7f783a4-af2d-4085-8eea-fd620cb440b2",
+  "id": "9e22afe6-5264-4d85-9861-2a9c908fce2d",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "files": {
@@ -10,9 +10,9 @@
         "id": {
           "name": "id",
           "type": "integer",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": true
         },
         "path": {
           "name": "path",

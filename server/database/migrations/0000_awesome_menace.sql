@@ -1,5 +1,5 @@
 CREATE TABLE `files` (
-	`id` integer,
+	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
 	`path` text,
 	`slug` text,
 	`frontmatter` text,

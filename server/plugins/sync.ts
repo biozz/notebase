@@ -1,10 +1,9 @@
 import { promises, readFile, watch } from 'fs'
-import { join } from 'path'
+import { join, parse, relative } from 'path'
 import { load as yamlLoad } from 'js-yaml'
 import { defineNitroPlugin } from 'nitropack/runtime'
 import { tables, useDrizzle } from '../utils/drizzle'
 
-const notesDir = '/Users/biozz/projects/notes'
 const frontmatterRegex = /---\n(.*?)\n---/s
 
 async function* walk(dir: string): AsyncGenerator<string> {
@@ -16,31 +15,38 @@ async function* walk(dir: string): AsyncGenerator<string> {
 }
 
 export default defineNitroPlugin(async () => {
+  const db = useDrizzle()
+  await db.delete(tables.files)
   const startTime = Date.now()
-  for await (const p of walk(notesDir)) {
-    if (p.startsWith('/Users/biozz/projects/notes/.git')) continue
-    if (p.startsWith('/Users/biozz/projects/notes/.obsidian')) continue
-    if (p.startsWith('/Users/biozz/projects/notes/.trash')) continue
-    if (p.startsWith('/Users/biozz/projects/notes/templates')) continue
-    if (!p.endsWith('.md')) continue
+  const rows = []
+  for await (const p of walk(process.env.NOTES_ROOT!)) {
+    const relPath = relative(process.env.NOTES_ROOT!, p)
+    if (relPath.startsWith('.git')) continue
+    if (relPath.startsWith('.obsidian')) continue
+    if (relPath.startsWith('.trash')) continue
+    if (relPath.startsWith('templates')) continue
+    if (!relPath.endsWith('.md')) continue
     readFile(p, async (err, data) => {
-      console.log(p, data.length)
       if (err) throw err
       const txt = data.toString()
       const fm = txt.match(frontmatterRegex)
       if (!fm) return
       if (!fm[1]) return
-      await useDrizzle().insert(tables.files).values({
-        path: p,
-        slug: p.replace(notesDir, ''),
+      rows.push({
+        path: relPath,
+        slug: parse(p).name,
         frontmatter: JSON.stringify(yamlLoad(fm[1].trim()), null, 2),
         content: txt,
       })
+      if (rows.length > 100) {
+        await db.insert(tables.files).values(rows)
+        rows.length = 0
+      }
     })
   }
-  console.log(`Synced ${notesDir} in ${Date.now() - startTime}ms`)
+  console.log(`Synced ${process.env.NOTES_ROOT!} in ${Date.now() - startTime}ms`)
   console.log('Watching for changes...')
-  watch(notesDir, { recursive: true }, async (event, filename) => {
+  watch(process.env.NOTES_ROOT!, { recursive: true }, async (event, filename) => {
     console.log(`Detected ${event} in ${filename}`)
   })
 })
