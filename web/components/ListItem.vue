@@ -1,20 +1,21 @@
 <script setup lang="ts" generic="T extends Item">
-import { ref, toggleItem, watch, type Item } from '#imports'
+import { ref, watch, type Item, useNuxtApp } from '#imports'
 import { LazyBaseItem } from '#components'
 
 const { item } = defineProps<{ item: T }>()
 
+const { $pb } = useNuxtApp()
 const checked = ref(item.done)
 
 watch(checked, (value) => {
   if (!value) {
-    toggleItem(item.id)
+    $pb.toggleItem(item.id)
     return
   }
   // TODO: add precheck state with timeout
   // ex. setTimeout(() => toggleItem(item.id), 1000)
-  // but also handle the intermeditate stat of the checkbox
-  toggleItem(item.id)
+  // but also handle the intermeditte stat of the checkbox
+  $pb.toggleItem(item.id)
 })
 </script>
 

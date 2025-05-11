@@ -1,14 +1,14 @@
 <script setup lang="ts">
 import type { NavigationMenuItem } from '@nuxt/ui'
-import { navigateTo } from '#app'
+import { navigateTo, useNuxtApp } from '#app'
 import {
   ref,
 } from '#imports'
-import { usePocketBase } from '~/utils/pb'
 
-const pb = usePocketBase()
+const { $pb } = useNuxtApp()
+
 const onLogout = async () => {
-  pb.authStore.clear()
+  $pb.client.authStore.clear()
   await navigateTo({ name: 'login' })
 }
 
@@ -21,8 +21,8 @@ const items = ref<NavigationMenuItem[]>([
   ],
   [
     {
-      label: pb.authStore.isValid ? 'Logout' : 'Login',
-      onClick: pb.authStore.isValid
+      label: $pb.client.authStore.isValid ? 'Logout' : 'Login',
+      onClick: $pb.client.authStore.isValid
         ? onLogout
         : () => navigateTo({ name: 'login' }),
     },
