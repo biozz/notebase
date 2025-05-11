@@ -11,7 +11,7 @@ export default defineNuxtConfig({
     autoImport: false,
   },
   devtools: { enabled: true },
-  css: ['~/assets/css/main.css'],
+  css: ['~/app/assets/css/main.css'],
   mdc: {
     highlight: {
       shikiEngine: 'oniguruma',
