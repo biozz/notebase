@@ -35,12 +35,6 @@ export default defineNuxtConfig({
     compatibilityVersion: 4,
   },
   compatibilityDate: '2024-11-01',
-  nitro: {
-    output: {
-      // { dir: '.output', serverDir: '.output/server', publicDir: '.output/public' }
-      publicDir: '../pb_public',
-    },
-  },
   eslint: {
     config: {
       stylistic: true,

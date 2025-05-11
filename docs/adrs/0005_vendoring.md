@@ -1,4 +1,4 @@
-# Vendor all dependencies and built frontend files
+# 2025-05-07 Vendor all dependencies and built frontend files
 
 I like how you can vendor Go dependencies and be sure that your app builds years and multiple version after you stop making changes to it.
 

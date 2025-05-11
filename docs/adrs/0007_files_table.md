@@ -1,4 +1,4 @@
-# Files table is minimal
+# 2025-05-07 Files table is minimal
 
 I want files table to be minimal and this is what I currently think is enough:
 

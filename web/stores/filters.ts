@@ -4,6 +4,7 @@ import { useActivitiesStore } from '#imports'
 
 export const useFiltersStore = defineStore('filters', () => {
   const query = useStorage('query', '', localStorage)
+  const queryType = useStorage('query-type', 'FTS', localStorage)
   const pathFilter = useStorage('path-filter', '', localStorage)
   const typeFilter = useStorage('type-filter', '', localStorage)
   const pathFilterEnabled = useStorage('path-filter-enabled', false, localStorage)
@@ -20,7 +21,12 @@ export const useFiltersStore = defineStore('filters', () => {
       filterParts.push(`path ~ '${pathFilter.value}'`)
     }
     if (query.value.length > 0) {
-      filterParts.push(query.value)
+      if (queryType.value === 'FTS') {
+        filterParts.push(`(content~'${query.value}'||frontmatter.summary~'${query.value}'||frontmatter.title~'${query.value}')`)
+      }
+      else if (queryType.value === 'QL') {
+        filterParts.push(query.value)
+      }
     }
     return filterParts.join(' && ')
   }
@@ -41,6 +47,7 @@ export const useFiltersStore = defineStore('filters', () => {
 
   return {
     query,
+    queryType,
     pathFilter,
     typeFilter,
     pathFilterEnabled,

@@ -1,4 +1,4 @@
-# Nuxt, pnpm and PicoCSS
+# 2025-05-07 Nuxt, pnpm and PicoCSS
 
 I prefer pnpm, because it is fast enough and robust. I find vanilla npm too slow. Bun didn't work for me. Yarn might be good, but I just don't use it enough.
 
