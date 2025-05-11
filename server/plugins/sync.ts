@@ -1,6 +1,7 @@
 import { promises, readFile, watch } from 'fs'
 import { join } from 'path'
 import { load as yamlLoad } from 'js-yaml'
+import { defineNitroPlugin } from 'nitropack/runtime'
 import { tables, useDrizzle } from '../utils/drizzle'
 
 const notesDir = '/Users/biozz/projects/notes'
@@ -14,11 +15,8 @@ async function* walk(dir: string): AsyncGenerator<string> {
   }
 }
 
-watch(notesDir, { recursive: true }, async (event, filename) => {
-  console.log(`Detected ${event} in ${filename}`)
-})
-
-export async function syncHook() {
+export default defineNitroPlugin(async () => {
+  const startTime = Date.now()
   for await (const p of walk(notesDir)) {
     if (p.startsWith('/Users/biozz/projects/notes/.git')) continue
     if (p.startsWith('/Users/biozz/projects/notes/.obsidian')) continue
@@ -31,6 +29,7 @@ export async function syncHook() {
       const txt = data.toString()
       const fm = txt.match(frontmatterRegex)
       if (!fm) return
+      if (!fm[1]) return
       await useDrizzle().insert(tables.files).values({
         path: p,
         slug: p.replace(notesDir, ''),
@@ -39,4 +38,9 @@ export async function syncHook() {
       })
     })
   }
-}
+  console.log(`Synced ${notesDir} in ${Date.now() - startTime}ms`)
+  console.log('Watching for changes...')
+  watch(notesDir, { recursive: true }, async (event, filename) => {
+    console.log(`Detected ${event} in ${filename}`)
+  })
+})

@@ -1,7 +1,7 @@
 import { sqliteTable, integer, text } from 'drizzle-orm/sqlite-core'
 
 export const files = sqliteTable('files', {
-  id: integer({ : true }),
+  id: integer(),
   path: text(),
   slug: text(),
   frontmatter: text({ mode: 'json' }),

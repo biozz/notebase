@@ -1,5 +1,3 @@
-import { syncHook } from './server/utils/syncHook'
-
 export default defineNuxtConfig({
   modules: [
     '@vueuse/nuxt',
@@ -27,8 +25,9 @@ export default defineNuxtConfig({
     compatibilityVersion: 4,
   },
   compatibilityDate: '2024-11-01',
-  hooks: {
-    ready: syncHook,
+  nitro: {
+    preset: 'bun',
+    dev: true,
   },
   eslint: {
     config: {
