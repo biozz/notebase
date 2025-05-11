@@ -1,26 +1,40 @@
 import { defineStore } from 'pinia'
 import {
-  pb,
   type Item,
-  type ItemType,
+  ItemType,
   shallowRef,
-  transformItem,
-  useFiltersStore,
+  // transformItem,
+  // useFiltersStore,
+  useFetch,
 } from '#imports'
 
 export const useActivitiesStore = defineStore('activities', () => {
   const items = shallowRef<Item[]>([])
   const itemTypes = shallowRef<Set<ItemType>>(new Set())
   const item = shallowRef<Item | undefined>(undefined)
-  const filtersStore = useFiltersStore()
+  // const filtersStore = useFiltersStore()
 
   const load = async () => {
-    const resultList = await pb.collection('files').getList(1, 20, {
-      filter: filtersStore.buildQuery(),
-    })
-    items.value = resultList.items.map((item) => {
+    const itemsResponse = await useFetch('/api/items')
+    console.log(itemsResponse)
+    // const resultList = await pb.collection('files').getList(1, 20, {
+    //   filter: filtersStore.buildQuery(),
+    // })
+    items.value = itemsResponse.data.value.map((item) => {
       itemTypes.value.add(item.frontmatter.type)
-      return transformItem(item)
+      return {
+        id: '1',
+        title: 'asdf',
+        content: 'asdf',
+        done: false,
+        type: ItemType.Debt,
+        frontmatter: {
+          season: 0,
+          episode: 0,
+          url: '',
+          next_episode: '',
+        },
+      }
     })
   }
 

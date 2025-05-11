@@ -2,19 +2,17 @@
 import { onMounted, shallowRef, ref } from 'vue'
 import type { MDCParserResult } from '@nuxtjs/mdc'
 import {
-  definePageMeta,
-  getItem,
-  transformItem,
   useActivitiesStore,
   useRoute,
   type Item,
   useMarkdownParser,
+  ItemType,
 } from '#imports'
 import { BaseItem } from '#components'
 
-definePageMeta({
-  middleware: ['auth'],
-})
+// definePageMeta({
+//   middleware: ['auth'],
+// })
 
 const route = useRoute()
 const activitiesStore = useActivitiesStore()
@@ -35,8 +33,21 @@ onMounted(async () => {
   let itemToFind = activitiesStore.items.find(item => item.id === route.params.id)
   if (!itemToFind) {
     try {
-      const result = await getItem(route.params.id)
-      itemToFind = transformItem(result)
+      // const result = await getItem(route.params.id)
+      // itemToFind = transformItem(result)
+      itemToFind = {
+        id: '1',
+        title: 'asdf',
+        content: 'asdf',
+        done: false,
+        type: ItemType.Debt,
+        frontmatter: {
+          season: 0,
+          episode: 0,
+          url: '',
+          next_episode: '',
+        },
+      }
     }
     catch (e) {
       console.error(e)

@@ -1,14 +1,14 @@
 import { defineStore } from 'pinia'
-import { useStorage, watchDebounced } from '@vueuse/core'
+import { useLocalStorage, watchDebounced } from '@vueuse/core'
 import { useActivitiesStore } from '#imports'
 
 export const useFiltersStore = defineStore('filters', () => {
-  const query = useStorage('query', '', localStorage)
-  const queryType = useStorage('query-type', 'FTS', localStorage)
-  const pathFilter = useStorage('path-filter', '', localStorage)
-  const typeFilter = useStorage('type-filter', '', localStorage)
-  const pathFilterEnabled = useStorage('path-filter-enabled', false, localStorage)
-  const typeFilterEnabled = useStorage('type-filter-enabled', false, localStorage)
+  const query = useLocalStorage('query', '')
+  const queryType = useLocalStorage('query-type', 'FTS')
+  const pathFilter = useLocalStorage('path-filter', '')
+  const typeFilter = useLocalStorage('type-filter', '')
+  const pathFilterEnabled = useLocalStorage('path-filter-enabled', false)
+  const typeFilterEnabled = useLocalStorage('type-filter-enabled', false)
 
   const activitiesStore = useActivitiesStore()
 

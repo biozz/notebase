@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { onMounted } from 'vue'
-import { useActivitiesStore, definePageMeta } from '#imports'
+import { useActivitiesStore } from '#imports'
 
-definePageMeta({
-  middleware: ['auth'],
-})
+// definePageMeta({
+//   middleware: ['auth'],
+// })
 
 const activitiesStore = useActivitiesStore()
 

@@ -2,6 +2,7 @@ import { promises, readFile, watch } from 'fs'
 import { join, parse, relative } from 'path'
 import { load as yamlLoad } from 'js-yaml'
 import { defineNitroPlugin } from 'nitropack/runtime'
+import type { SQLiteInsertValue } from 'drizzle-orm/sqlite-core'
 import { tables, useDrizzle } from '../utils/drizzle'
 
 const frontmatterRegex = /---\n(.*?)\n---/s
@@ -18,7 +19,7 @@ export default defineNitroPlugin(async () => {
   const db = useDrizzle()
   await db.delete(tables.files)
   const startTime = Date.now()
-  const rows = []
+  const rows: SQLiteInsertValue<typeof tables.files>[] = []
   for await (const p of walk(process.env.NOTES_ROOT!)) {
     const relPath = relative(process.env.NOTES_ROOT!, p)
     if (relPath.startsWith('.git')) continue
@@ -46,7 +47,7 @@ export default defineNitroPlugin(async () => {
   }
   console.log(`Synced ${process.env.NOTES_ROOT!} in ${Date.now() - startTime}ms`)
   console.log('Watching for changes...')
-  watch(process.env.NOTES_ROOT!, { recursive: true }, async (event, filename) => {
-    console.log(`Detected ${event} in ${filename}`)
-  })
+  // watch(process.env.NOTES_ROOT!, { recursive: true }, async (event, filename) => {
+  //   console.log(`Detected ${event} in ${filename}`)
+  // })
 })

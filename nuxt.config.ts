@@ -10,7 +10,7 @@ export default defineNuxtConfig({
   imports: {
     autoImport: false,
   },
-  devtools: { enabled: true },
+  devtools: { enabled: false },
   css: ['~/assets/css/main.css'],
   mdc: {
     highlight: {
@@ -21,13 +21,20 @@ export default defineNuxtConfig({
       langs: ['js', 'ts', 'yaml', 'markdown', 'json'],
     },
   },
+  watchers: {
+    chokidar: {
+      usePolling: true,
+    },
+  },
   future: {
     compatibilityVersion: 4,
   },
   compatibilityDate: '2024-11-01',
   nitro: {
     preset: 'bun',
-    dev: true,
+    watchOptions: {
+      usePolling: true,
+    },
   },
   eslint: {
     config: {
