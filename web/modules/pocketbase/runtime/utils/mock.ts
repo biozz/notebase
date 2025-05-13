@@ -70,7 +70,7 @@ export function useMockClient(): BaseClient {
       }
       return item || defaultReturn
     },
-    addDebtTransaction: async (id: string, amount: number, comment: string) => {
+    addDebtTransaction: async (id: string, amount: number, comment?: string) => {
       const item = localItems.value.find(item => item.id === id)
       if (!item) {
         throw new Error('Item not found')
