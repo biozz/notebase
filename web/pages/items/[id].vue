@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, shallowRef, ref } from 'vue'
+import { onMounted, shallowRef, ref, computed } from 'vue'
 import type { MDCParserResult } from '@nuxtjs/mdc'
 import {
   definePageMeta,
@@ -9,7 +9,6 @@ import {
   useClient,
 } from '#imports'
 import { BaseItem } from '#components'
-import type { ItemRecord } from '#pocketbase-imports'
 
 definePageMeta({
   middleware: ['auth'],
@@ -20,10 +19,20 @@ const activitiesStore = useActivitiesStore()
 const parseMd = useMarkdownParser()
 const contentAst = ref<MDCParserResult | null>(null)
 const frontmatterAst = ref<MDCParserResult | null>(null)
-const item = shallowRef<ItemRecord>()
+
 const error = shallowRef<string>()
 
 const isLoading = shallowRef(false)
+
+const item = computed({
+  get() {
+    return activitiesStore.items.find(item => item.id === route.params.id)
+  },
+  set(value) {
+    if (!value) return
+    activitiesStore.addItem(value)
+  },
+})
 
 onMounted(async () => {
   if (typeof route.params.id !== 'string') {
@@ -41,11 +50,11 @@ onMounted(async () => {
       error.value = 'Item not found'
     }
   }
-  item.value = itemToFind
+  activitiesStore.addItem(itemToFind!)
   isLoading.value = false
 
-  contentAst.value = await parseMd(item.value!.content)
-  frontmatterAst.value = await parseMd('```json\n' + JSON.stringify(item.value!.frontmatter, null, 2) + '\n```')
+  contentAst.value = await parseMd(item.value?.content ?? '\n')
+  frontmatterAst.value = await parseMd('```json\n' + JSON.stringify(item.value?.frontmatter ?? {}, null, 2) + '\n```')
 })
 </script>
 
@@ -64,7 +73,7 @@ onMounted(async () => {
         :is-list="false"
       />
       <hr class="my-4">
-      <UCollapsible>
+      <UCollapsible v-if="frontmatterAst?.body">
         <UButton
           class="group"
           label="Frontmatter"
@@ -88,6 +97,7 @@ onMounted(async () => {
         </template>
       </UCollapsible>
       <UCollapsible
+        v-if="contentAst?.body"
         class="mt-4"
       >
         <UButton
