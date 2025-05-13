@@ -2,8 +2,8 @@
 import { z } from 'zod'
 
 export const formSchema = z.object({
-  amount: z.number(),
-  comment: z.string().min(1).max(256),
+  amount: z.number({ error: 'amount is required' }),
+  comment: z.string().max(256, { error: 'comment is too long' }).optional(),
 })
 
 export type FormState = z.infer<typeof formSchema>

@@ -29,7 +29,7 @@ export function createPocketBaseClient(url: string): BaseClient {
     return recordSchema.parse(res)
   }
 
-  const addDebtTransaction = async (id: string, amount: number, comment: string) => {
+  const addDebtTransaction = async (id: string, amount: number, comment?: string) => {
     const item = await getItem(id)
 
     const frontmatter = frontmatterSchema.parse(item.frontmatter ? item.frontmatter : {})
