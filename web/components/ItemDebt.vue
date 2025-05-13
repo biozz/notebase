@@ -1,7 +1,18 @@
+<script lang="ts">
+import { z } from 'zod'
+
+export const formSchema = z.object({
+  amount: z.number(),
+  comment: z.string().min(1).max(256),
+})
+
+export type FormState = z.infer<typeof formSchema>
+</script>
+
 <script setup lang="ts" generic="T extends ItemRecord & { frontmatter: DebtFrontmatter }">
 import type { TableColumn } from '@nuxt/ui'
-import { h, ref, computed, reactive } from '#imports'
-import { UButton } from '#components'
+import { h, ref, computed, useClient, useActivitiesStore } from '#imports'
+import { UButton, LazyDebtAddFrom } from '#components'
 import type { ItemRecord, DebtFrontmatter } from '#pocketbase-imports'
 
 const { item, isList } = defineProps<{ item: T, isList?: boolean }>()
@@ -100,10 +111,13 @@ const sorting = ref([
   },
 ])
 
-const state = reactive({
-  amount: undefined,
-  comment: undefined,
-})
+const activitiesStore = useActivitiesStore()
+const pb = useClient()
+
+async function handleSuccess(data: FormState) {
+  const itemToUpdate = await pb.addDebtTransaction(item.id, data.amount, data.comment)
+  activitiesStore.updateItem(itemToUpdate)
+}
 </script>
 
 <template>
@@ -117,34 +131,7 @@ const state = reactive({
       <h5>Всего: {{ formatCurrency(total) }}</h5>
       <h5>Возвращено: {{ formatCurrency(returned) }}</h5>
       <h5>Осталось: {{ formatCurrency(left) }}</h5>
-      <UForm
-        :state="state"
-        class="mt-2 flex gap-2"
-      >
-        <UFormField
-          name="amount"
-        >
-          <UInput
-            v-model="state.amount"
-            placeholder="-20000"
-            type="number"
-          />
-        </UFormField>
-
-        <UFormField
-          name="comment"
-        >
-          <UInput
-            v-model="state.comment"
-            placeholder="Comment"
-            type="text"
-          />
-        </UFormField>
-
-        <UButton type="submit">
-          Add
-        </UButton>
-      </UForm>
+      <LazyDebtAddFrom @success="handleSuccess" />
       <UTable
         v-model:sorting="sorting"
         :data="transactions"
