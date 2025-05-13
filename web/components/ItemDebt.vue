@@ -12,7 +12,7 @@ export type FormState = z.infer<typeof formSchema>
 <script setup lang="ts" generic="T extends ItemRecord & { frontmatter: DebtFrontmatter }">
 import type { TableColumn } from '@nuxt/ui'
 import { h, ref, computed, useClient, useActivitiesStore } from '#imports'
-import { UButton, LazyDebtAddFrom } from '#components'
+import { UButton, LazyDebtAddForm } from '#components'
 import type { ItemRecord, DebtFrontmatter } from '#pocketbase-imports'
 
 const { item, isList } = defineProps<{ item: T, isList?: boolean }>()
@@ -131,7 +131,7 @@ async function handleSuccess(data: FormState) {
       <h5>Всего: {{ formatCurrency(total) }}</h5>
       <h5>Возвращено: {{ formatCurrency(returned) }}</h5>
       <h5>Осталось: {{ formatCurrency(left) }}</h5>
-      <LazyDebtAddFrom @success="handleSuccess" />
+      <LazyDebtAddForm @success="handleSuccess" />
       <UTable
         v-model:sorting="sorting"
         :data="transactions"
