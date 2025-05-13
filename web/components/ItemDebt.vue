@@ -13,7 +13,7 @@ export type FormState = z.infer<typeof formSchema>
 <script setup lang="ts" generic="T extends ItemRecord & { frontmatter: DebtFrontmatter }">
 import type { TableColumn } from '@nuxt/ui'
 import { h, ref, computed, useClient, useActivitiesStore, resolveComponent } from '#imports'
-import { UButton, LazyDebtAddForm, UDropdownMenu } from '#components'
+import { LazyDebtAddEditForm } from '#components'
 import type { ItemRecord, DebtFrontmatter } from '#pocketbase-imports'
 
 const { item, isList } = defineProps<{ item: T, isList?: boolean }>()
@@ -164,12 +164,10 @@ async function handleSuccess(data: FormState) {
   activitiesStore.updateItem(itemToUpdate)
 }
 
-async function handleEdit(row: FormState) {
-  if (!row.date) {
-    return
-  }
-  const itemToUpdate = await pb.updateDebtTransaction(item.id, row.date, row.amount, row.comment)
+async function handleEdit(id: string, payload: FormState, cb: () => void) {
+  const itemToUpdate = await pb.updateDebtTransaction(item.id, id, payload)
   activitiesStore.updateItem(itemToUpdate)
+  cb()
 }
 </script>
 
@@ -184,26 +182,26 @@ async function handleEdit(row: FormState) {
       <h5>Всего: {{ formatCurrency(total) }}</h5>
       <h5>Возвращено: {{ formatCurrency(returned) }}</h5>
       <h5>Осталось: {{ formatCurrency(left) }}</h5>
-      <LazyDebtAddForm @success="handleSuccess" />
+      <DebtAddEditForm @success="handleSuccess" />
       <UTable
         v-model:sorting="sorting"
         :data="transactions"
         :columns="columns"
       >
         <template #expanded="{ row }">
-          <LazyDebtAddForm
+          <LazyDebtAddEditForm
             type="edit"
             :defaults="{
               date: row.original.date,
               amount: row.original.amount,
               comment: row.original.comment ?? '',
             }"
-            @success="handleEdit"
+            @success="(data) => handleEdit(row.original.date, data, row.toggleExpanded)"
           >
             <template #submit>
               update
             </template>
-          </LazyDebtAddForm>
+          </LazyDebtAddEditForm>
         </template>
       </UTable>
     </div>

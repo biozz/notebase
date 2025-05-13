@@ -6,6 +6,7 @@ import tasks from '~/assets/mock/tasks.json'
 import debts from '~/assets/mock/debts.json'
 import tracks from '~/assets/mock/tracks.json'
 import withContent from '~/assets/mock/withContent.json'
+import { parseDate } from './time'
 
 const createDefaultReturn = () => {
   const defaultReturn: RecordModel = {
@@ -84,18 +85,24 @@ export function useMockClient(): BaseClient {
       }
       return item
     },
-    updateDebtTransaction: async (id: string, date: string, amount?: number, comment?: string) => {
+    updateDebtTransaction: async (
+      id: string,
+      date: string,
+      payload: { date?: string, amount?: number, comment?: string } = {},
+    ) => {
       const item = localItems.value.find(item => item.id === id)
       if (!item) {
         throw new Error('Item not found')
       }
-      const transaction = (item.frontmatter.transactions as DebtTransaction[])?.find(t => t.created === date)
+      const transaction = (item.frontmatter.transactions as DebtTransaction[])?.find(
+        t => parseDate(t.created).compare(parseDate(date)) === 0,
+      )
       if (!transaction) {
         throw new Error('Transaction not found')
       }
-      transaction.created = date ?? transaction.created
-      transaction.amount = amount ?? transaction.amount
-      transaction.comment = comment ?? transaction.comment
+      transaction.created = payload.date ?? transaction.created
+      transaction.amount = payload.amount ?? transaction.amount
+      transaction.comment = payload.comment ?? transaction.comment
 
       return item
     },
