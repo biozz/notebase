@@ -1,29 +1,58 @@
 <script lang="ts" setup>
 import type { FormSubmitEvent } from '@nuxt/ui'
-import { reactive } from '#imports'
+import { onMounted, reactive } from '#imports'
 import { type FormState, formSchema } from '../ItemDebt.vue'
+
+const { defaults, type = 'add' } = defineProps<{
+  defaults?: {
+    date?: string
+    amount?: number
+    comment?: string
+  }
+  type?: 'add' | 'edit'
+}>()
 
 const emit = defineEmits<{
   (e: 'success', data: FormState): void
 }>()
 
-const state = reactive({
+const state = reactive<FormState>({
+  date: undefined,
   amount: 0,
-  comment: '',
+  comment: undefined,
 })
 
 function onSubmit(event: FormSubmitEvent<FormState>) {
   emit('success', event.data)
 }
+
+onMounted(() => {
+  if (defaults) {
+    state.date = defaults.date ?? undefined
+    state.amount = defaults.amount ?? 0
+    state.comment = defaults.comment ?? undefined
+  }
+})
 </script>
 
 <template>
   <UForm
     :state="state"
     :schema="formSchema"
-    class="mt-2 flex gap-2"
+    class="mt-2 flex gap-2 relative"
     @submit="onSubmit"
   >
+    <div class="absolute -top-5 text-xs z-20" />
+    <UFormField
+      v-if="type === 'edit'"
+      name="date"
+    >
+      <UInput
+        v-model="state.date"
+        placeholder="Date"
+        type="datetime-local"
+      />
+    </UFormField>
     <UFormField
       name="amount"
     >
@@ -45,7 +74,9 @@ function onSubmit(event: FormSubmitEvent<FormState>) {
     </UFormField>
 
     <UButton type="submit">
-      Add
+      <slot name="submit">
+        Add
+      </slot>
     </UButton>
   </UForm>
 </template>

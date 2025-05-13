@@ -45,6 +45,20 @@ export function createPocketBaseClient(url: string): BaseClient {
     })
     return recordSchema.parse(res)
   }
+  const updateDebtTransaction = async (id: string, date: string, amount?: number, comment?: string) => {
+    const item = await getItem(id)
+    const frontmatter = frontmatterSchema.parse(item.frontmatter ? item.frontmatter : {})
+    const transaction = frontmatter.transactions?.find(t => t.created === date)
+    if (!transaction) {
+      throw new Error('Transaction not found')
+    }
+    transaction.amount = amount ?? transaction.amount
+    transaction.comment = comment ?? transaction.comment
+    const res = await pb.collection('files').update(item.id, {
+      frontmatter,
+    })
+    return recordSchema.parse(res)
+  }
   const isAuthenticated = async () => {
     return pb.authStore.isValid
   }
@@ -71,6 +85,7 @@ export function createPocketBaseClient(url: string): BaseClient {
     getItem,
     toggleItem,
     addDebtTransaction,
+    updateDebtTransaction,
     isAuthenticated,
     clearAuth,
     authenticatedUser,
