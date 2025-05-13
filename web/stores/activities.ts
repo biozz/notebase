@@ -19,5 +19,19 @@ export const useActivitiesStore = defineStore('activities', () => {
     items.value = resultList.items
   }
 
-  return { items, item, itemTypes, load }
+  function addItem(item: ItemRecord) {
+    const itemExists = items.value.find(i => i.id === item.id)
+    if (itemExists) {
+      updateItem(item)
+    }
+    else {
+      items.value = [...items.value, item]
+    }
+  }
+
+  function updateItem(item: ItemRecord) {
+    items.value = items.value.map(i => i.id === item.id ? item : i)
+  }
+
+  return { items, item, itemTypes, load, addItem, updateItem }
 })
