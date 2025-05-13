@@ -96,6 +96,16 @@ export interface BaseClient {
    */
   addDebtTransaction: (id: string, amount: number, comment: string) => Promise<ItemRecord>
 
+ /**
+   * Updates a debt transaction of an existing debt item
+   * @param id - The unique identifier of the debt item
+   * @param date - The date of the transaction to update
+   * @param amount - The new transaction amount
+   * @param comment - Optional new description of the transaction
+   * @returns Promise resolving to the updated debt record
+   */
+  updateDebtTransaction: (id: string, date: string, payload: { date?: string, amount?: number, comment?: string }) => Promise<ItemRecord>
+
   /**
    * Checks if the current client has valid authentication
    * @returns Promise resolving to authentication status (true/false)
