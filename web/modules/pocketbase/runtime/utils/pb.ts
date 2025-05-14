@@ -1,6 +1,7 @@
 import PocketBase from 'pocketbase'
 import type { BaseClient } from '../../types/types'
 import { frontmatterSchema, recordSchema } from '../../types/schema'
+import { parseDate } from './time'
 
 export function createPocketBaseClient(url: string): BaseClient {
   const pb = new PocketBase(url)
@@ -29,17 +30,41 @@ export function createPocketBaseClient(url: string): BaseClient {
     return recordSchema.parse(res)
   }
 
-  const addDebtTransaction = async (id: string, amount: number, comment: string) => {
+  const addDebtTransaction = async (id: string, amount: number, comment?: string) => {
     const item = await getItem(id)
 
     const frontmatter = frontmatterSchema.parse(item.frontmatter ? item.frontmatter : {})
 
     const transaction = {
       amount,
-      created: new Date().toISOString(),
+      created: new Date().toISOString().split('.')[0]!,
       comment,
     }
     frontmatter.transactions?.push(transaction)
+    const res = await pb.collection('files').update(item.id, {
+      frontmatter,
+    })
+    return recordSchema.parse(res)
+  }
+  const updateDebtTransaction = async (
+    id: string,
+    date: string,
+    payload: { date?: string, amount?: number, comment?: string } = {},
+  ) => {
+    const item = await getItem(id)
+
+    const frontmatter = frontmatterSchema.parse(item.frontmatter ? item.frontmatter : {})
+    const originalDate = parseDate(date)
+
+    const transaction = frontmatter.transactions?.find(t =>
+      parseDate(t.created).compare(originalDate) === 0,
+    )
+    if (!transaction) {
+      throw new Error('Transaction not found')
+    }
+    transaction.created = payload.date ?? transaction.created
+    transaction.amount = payload.amount ?? transaction.amount
+    transaction.comment = payload.comment ?? transaction.comment
     const res = await pb.collection('files').update(item.id, {
       frontmatter,
     })
@@ -71,6 +96,7 @@ export function createPocketBaseClient(url: string): BaseClient {
     getItem,
     toggleItem,
     addDebtTransaction,
+    updateDebtTransaction,
     isAuthenticated,
     clearAuth,
     authenticatedUser,

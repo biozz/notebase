@@ -1,10 +1,25 @@
+<script lang="ts">
+import { z } from 'zod'
+
+export const formSchema = z.object({
+  date: z.iso.datetime({ local: true }).optional(),
+  amount: z.number({ error: 'amount is required' }),
+  comment: z.string().max(256, { error: 'comment is too long' }).optional(),
+})
+
+export type FormState = z.infer<typeof formSchema>
+</script>
+
 <script setup lang="ts" generic="T extends ItemRecord & { frontmatter: DebtFrontmatter }">
 import type { TableColumn } from '@nuxt/ui'
-import { h, ref, computed, reactive } from '#imports'
-import { UButton } from '#components'
+import { h, ref, computed, useClient, useActivitiesStore, resolveComponent } from '#imports'
+import { LazyDebtAddEditForm } from '#components'
 import type { ItemRecord, DebtFrontmatter } from '#pocketbase-imports'
 
 const { item, isList } = defineProps<{ item: T, isList?: boolean }>()
+
+const UDropdownMenu = resolveComponent('UDropdownMenu')
+const UButton = resolveComponent('UButton')
 
 function clamp(value: number, min: number, max: number) {
   return Math.max(min, Math.min(value, max))
@@ -42,13 +57,20 @@ const transactions = computed(() => {
       id: `${tx.created}-${tx.amount}-${tx.comment ?? 'None'}`,
       amount: tx.amount,
       comment: tx.comment,
+      date: tx.created,
     }
   })
 })
-
-const columns: TableColumn<{ id: string, amount: number, comment: string | null | undefined }>[] = [
+// const isEditing = ref(false)
+type Transaction = {
+  id: string
+  date: string
+  amount: number
+  comment: string | null | undefined
+}
+const columns: TableColumn<Transaction>[] = [
   {
-    accessorKey: 'id',
+    accessorKey: 'date',
     header: ({ column }) => {
       // TODO: fix sorting
       const isSorted = column.getIsSorted()
@@ -67,7 +89,7 @@ const columns: TableColumn<{ id: string, amount: number, comment: string | null 
       })
     },
     cell: ({ row }) => {
-      return new Date(row.getValue('id')).toLocaleDateString('ru-RU', {
+      return new Date(row.getValue('date')).toLocaleDateString('ru-RU', {
         year: 'numeric',
         month: '2-digit',
         day: '2-digit',
@@ -91,19 +113,62 @@ const columns: TableColumn<{ id: string, amount: number, comment: string | null 
       return row.getValue('comment') ?? '-'
     },
   },
+  {
+    id: 'actions',
+    cell: ({ row }) => {
+      return h(
+        'div',
+        { class: 'text-right' },
+        h(
+          UDropdownMenu,
+          {
+            'content': {
+              align: 'end',
+            },
+            'items': [
+              {
+                label: 'Edit',
+                icon: 'i-lucide-edit',
+                onClick: () => row.toggleExpanded(),
+              },
+            ],
+            'aria-label': 'Actions dropdown',
+          },
+          () =>
+            h(UButton, {
+              'icon': 'i-lucide-ellipsis-vertical',
+              'color': 'neutral',
+              'variant': 'ghost',
+              'class': 'ml-auto',
+              'aria-label': 'Actions dropdown',
+            }),
+        ),
+      )
+    },
+  },
 ]
 
 const sorting = ref([
   {
-    id: 'id',
+    id: 'date',
     desc: false,
   },
 ])
 
-const state = reactive({
-  amount: undefined,
-  comment: undefined,
-})
+const activitiesStore = useActivitiesStore()
+const pb = useClient()
+
+async function handleSuccess(data: FormState) {
+  console.log(data)
+  const itemToUpdate = await pb.addDebtTransaction(item.id, data.amount, data.comment)
+  activitiesStore.updateItem(itemToUpdate)
+}
+
+async function handleEdit(id: string, payload: FormState, cb: () => void) {
+  const itemToUpdate = await pb.updateDebtTransaction(item.id, id, payload)
+  activitiesStore.updateItem(itemToUpdate)
+  cb()
+}
 </script>
 
 <template>
@@ -117,39 +182,28 @@ const state = reactive({
       <h5>Всего: {{ formatCurrency(total) }}</h5>
       <h5>Возвращено: {{ formatCurrency(returned) }}</h5>
       <h5>Осталось: {{ formatCurrency(left) }}</h5>
-      <UForm
-        :state="state"
-        class="mt-2 flex gap-2"
-      >
-        <UFormField
-          name="amount"
-        >
-          <UInput
-            v-model="state.amount"
-            placeholder="-20000"
-            type="number"
-          />
-        </UFormField>
-
-        <UFormField
-          name="comment"
-        >
-          <UInput
-            v-model="state.comment"
-            placeholder="Comment"
-            type="text"
-          />
-        </UFormField>
-
-        <UButton type="submit">
-          Add
-        </UButton>
-      </UForm>
+      <DebtAddEditForm @success="handleSuccess" />
       <UTable
         v-model:sorting="sorting"
         :data="transactions"
         :columns="columns"
-      />
+      >
+        <template #expanded="{ row }">
+          <LazyDebtAddEditForm
+            type="edit"
+            :defaults="{
+              date: row.original.date,
+              amount: row.original.amount,
+              comment: row.original.comment ?? '',
+            }"
+            @success="(data) => handleEdit(row.original.date, data, row.toggleExpanded)"
+          >
+            <template #submit>
+              update
+            </template>
+          </LazyDebtAddEditForm>
+        </template>
+      </UTable>
     </div>
   </div>
 </template>

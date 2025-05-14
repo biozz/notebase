@@ -1,11 +1,12 @@
 import { useLocalStorage } from '@vueuse/core'
 import type { RecordModel } from 'pocketbase'
-import type { BaseClient } from '../../types/types'
+import type { BaseClient, DebtTransaction } from '../../types/types'
 import { frontmatterSchema, type ItemRecord } from '../../types/schema'
 import tasks from '~/assets/mock/tasks.json'
 import debts from '~/assets/mock/debts.json'
 import tracks from '~/assets/mock/tracks.json'
 import withContent from '~/assets/mock/withContent.json'
+import { parseDate } from './time'
 
 const createDefaultReturn = () => {
   const defaultReturn: RecordModel = {
@@ -23,7 +24,6 @@ const createDefaultReturn = () => {
 const useLocalItems = () => useLocalStorage<ItemRecord[]>('items', [])
 
 export function useMockClient(): BaseClient {
-  const defaultReturn = createDefaultReturn()
   const localItems = useLocalItems()
   if (localItems.value.length === 0) {
     const items = [...tasks, ...debts, ...tracks, ...withContent].map((item) => {
@@ -68,9 +68,9 @@ export function useMockClient(): BaseClient {
           completed: new Date().toISOString(),
         }
       }
-      return item || defaultReturn
+      return item
     },
-    addDebtTransaction: async (id: string, amount: number, comment: string) => {
+    addDebtTransaction: async (id: string, amount: number, comment?: string) => {
       const item = localItems.value.find(item => item.id === id)
       if (!item) {
         throw new Error('Item not found')
@@ -83,7 +83,28 @@ export function useMockClient(): BaseClient {
           created: new Date().toISOString(),
         })
       }
-      return item || defaultReturn
+      return item
+    },
+    updateDebtTransaction: async (
+      id: string,
+      date: string,
+      payload: { date?: string, amount?: number, comment?: string } = {},
+    ) => {
+      const item = localItems.value.find(item => item.id === id)
+      if (!item) {
+        throw new Error('Item not found')
+      }
+      const transaction = (item.frontmatter.transactions as DebtTransaction[])?.find(
+        t => parseDate(t.created).compare(parseDate(date)) === 0,
+      )
+      if (!transaction) {
+        throw new Error('Transaction not found')
+      }
+      transaction.created = payload.date ?? transaction.created
+      transaction.amount = payload.amount ?? transaction.amount
+      transaction.comment = payload.comment ?? transaction.comment
+
+      return item
     },
     getList: async (page: number, pageSize: number, _filter: string) => {
       const filteredItems = localItems.value.filter(() => true)
