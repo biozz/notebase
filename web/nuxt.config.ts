@@ -6,6 +6,7 @@ export default defineNuxtConfig({
     '@nuxt/ui',
     '@nuxtjs/mdc',
     '~/modules/pocketbase/module',
+    '@pinia/colada-nuxt',
   ],
   ssr: false,
   imports: {

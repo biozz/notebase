@@ -1,23 +1,23 @@
 <script setup lang="ts">
-import { onMounted } from 'vue'
-import { useActivitiesStore, definePageMeta } from '#imports'
+import { definePageMeta } from '#imports'
+import { useActivitiesQuery } from '~/composables/queries/'
 
 definePageMeta({
   middleware: ['auth'],
 })
 
-const activitiesStore = useActivitiesStore()
-
-onMounted(async () => {
-  await activitiesStore.load()
-})
+const { state } = useActivitiesQuery()
 </script>
 
 <template>
   <div>
     <AppFilters />
+    <div v-if="state.status !== 'success'">
+      <!-- this can be a skeleton loader -->
+      <UProgress indeterminate />
+    </div>
     <UCard
-      v-for="item in activitiesStore.items"
+      v-for="item in state.data?.items"
       :key="item.id"
       class="mt-4"
     >
