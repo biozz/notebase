@@ -1,6 +1,6 @@
-<script setup lang="ts" generic="T extends Item & { frontmatter: TrackFrontmatter }">
-import { ref, type Item, type TrackFrontmatter } from '#imports'
-import { incrByStep } from '~/utils/services'
+<script setup lang="ts" generic="T extends ItemRecord & { frontmatter: TrackFrontmatter }">
+import { ref } from '#imports'
+import type { ItemRecord, TrackFrontmatter } from '#pocketbase-imports'
 
 const { item, incrKey } = defineProps<{ item: T, incrKey: string }>()
 
@@ -13,8 +13,8 @@ if (incrKey === 'episode') {
   num.value = item.frontmatter.episode
 }
 
-const incr = (n: number) => {
-  incrByStep(item.id, incrKey, n)
+const incr = (_n: number) => {
+
 }
 
 const onManualChange = () => {
