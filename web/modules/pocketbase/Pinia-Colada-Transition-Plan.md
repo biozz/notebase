@@ -1,7 +1,7 @@
 # Pinia Colada Transition Plan for PocketBase
 
 ## Overview
-This document outlines the plan to transition from a manual client setup to using [Pinia Colada](https://pinia-colada.esm.dev/) for data fetching in our PocketBase module. Pinia Colada offers automatic caching, async state management, and a powerful plugin system which will streamline our state management process.
+This document outlines the plan to transition from a manual client setup to using [Pinia Colada](https://pinia-colada.esm.dev/) for data fetching in our PocketBase integration. Pinia Colada offers automatic caching, async state management, and a powerful plugin system which will streamline our state management process.
 
 ## Goals
 - Replace manual API calls with Pinia Colada's data fetching capabilities.
@@ -36,16 +36,17 @@ The new architecture will:
 
 3. **Create a modular structure**:
    ```
-   /runtime
-     /composables
-       /queries
-         useItemQuery.ts
-         useItemListQuery.ts
-       /mutations
-         useItemToggleMutation.ts
-         useDebtTransactionMutation.ts
-       /auth
-         useAuthQuery.ts
+   /composables
+     /queries
+       useItemQuery.ts
+       useItemListQuery.ts
+       useActivitiesQuery.ts
+       index.ts
+     /mutations
+       useItemToggleMutation.ts
+       useDebtTransactionMutation.ts
+     /auth
+       useAuthQuery.ts
    ```
 
 ## Benefits
@@ -68,8 +69,8 @@ The new architecture will:
 
 ## Steps
 1. **Setup Pinia Colada**: Install and configure Pinia Colada in the project.
-2. **Define Data Fetching Stores**: Create stores using Pinia Colada for different PocketBase collections.
-3. **Create Composables**: Implement the individual composables for queries and mutations.
+2. **Define Query Composables**: Create composables using Pinia Colada for different PocketBase collections.
+3. **Create Domain-Specific Queries**: Implement the individual composables for queries and mutations.
 4. **Integrate with PocketBase**: Adapt the existing PocketBase client to work with Pinia Colada's fetching mechanism.
 5. **Update Components**: Modify components to use the new composables instead of direct API calls.
 6. **Testing**: Ensure all functionalities work as expected with the new setup.
@@ -85,7 +86,7 @@ const item = await $client.getItem('item_id')
 
 ### After:
 ```ts
-import { useItemQuery } from '#pocketbase-imports'
+import { useItemQuery } from '~/composables/queries'
 
 // Automatic caching, loading states, and error handling
 const { data: item, isPending, error } = useItemQuery('item_id')
