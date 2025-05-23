@@ -93,6 +93,13 @@ const { data: item, isPending, error } = useItemQuery('item_id')
 
 // Access to additional features like manual refetching
 const { refetch } = useItemQuery('item_id')
+
+// or
+
+const {state, setItemId} = useItemQuery()
+
+setItemId('item_id')   
+
 ```
 
 ## Resources
