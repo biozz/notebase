@@ -12,6 +12,21 @@ export default defineNuxtConfig({
     autoImport: false,
   },
   devtools: { enabled: true },
+  app: {
+    head: {
+      title: 'Notebase',
+      viewport: 'width=device-width, initial-scale=1',
+      htmlAttrs: {
+        lang: 'en-US',
+      },
+      link: [
+        { rel: 'icon', type: 'image/x-icon', href: '/favicon.svg' },
+      ],
+      meta: [
+        { name: 'apple-mobile-web-app-status-bar-style', content: 'black-translucent' },
+      ],
+    },
+  },
   css: ['~/assets/css/main.css'],
   router: {
     options: {
