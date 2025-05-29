@@ -21,7 +21,7 @@ defineShortcuts({
       size="xl"
       variant="outline"
       placeholder="Query"
-      class="w-full text-xl"
+      class="w-full"
       autocapitalize="none"
       autocorrect="off"
     >
@@ -59,7 +59,6 @@ defineShortcuts({
       color="neutral"
       variant="outline"
       placeholder="inbox/activities/%"
-      class="text-xl"
       autocapitalize="none"
       autocorrect="off"
     />
@@ -80,7 +79,6 @@ defineShortcuts({
       color="neutral"
       variant="outline"
       placeholder="debt"
-      class="text-xl"
       autocapitalize="none"
       autocorrect="off"
     />
