@@ -22,6 +22,8 @@ defineShortcuts({
       variant="outline"
       placeholder="Query"
       class="w-full"
+      autocapitalize="none"
+      autocorrect="off"
     >
       <template #trailing>
         <UButton
@@ -57,6 +59,9 @@ defineShortcuts({
       color="neutral"
       variant="outline"
       placeholder="inbox/activities/%"
+      class="ios-zoom-fix"
+      autocapitalize="none"
+      autocorrect="off"
     />
   </UButtonGroup>
 
@@ -75,6 +80,15 @@ defineShortcuts({
       color="neutral"
       variant="outline"
       placeholder="debt"
+      class="ios-zoom-fix"
+      autocapitalize="none"
+      autocorrect="off"
     />
   </UButtonGroup>
 </template>
+
+<style lang="css" scoped>
+.ios-zoom-fix {
+  font-size: 16px;
+}
+</style>
