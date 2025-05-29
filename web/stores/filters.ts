@@ -10,7 +10,7 @@ export const useFiltersStore = defineStore('filters', () => {
   const pathFilterEnabled = useStorage('path-filter-enabled', false, localStorage)
   const typeFilterEnabled = useStorage('type-filter-enabled', false, localStorage)
 
-  const buildedQuery = ref('')
+  const builtQuery = ref('')
 
   function buildQuery() {
     const filterParts: string[] = []
@@ -28,7 +28,7 @@ export const useFiltersStore = defineStore('filters', () => {
         filterParts.push(query.value)
       }
     }
-    return filterParts.join(' && ')
+    builtQuery.value = filterParts.join(' && ')
   }
 
   watchDebounced(
@@ -40,7 +40,7 @@ export const useFiltersStore = defineStore('filters', () => {
       typeFilterEnabled,
     ],
     () => {
-      buildedQuery.value = buildQuery()
+      buildQuery()
     },
     { debounce: 300 },
   )
@@ -53,6 +53,6 @@ export const useFiltersStore = defineStore('filters', () => {
     pathFilterEnabled,
     typeFilterEnabled,
     buildQuery,
-    buildedQuery,
+    builtQuery,
   }
 })
