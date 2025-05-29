@@ -67,7 +67,10 @@ onMounted(async () => {
       label="Email"
       name="email"
     >
-      <UInput v-model="state.email" />
+      <UInput
+        v-model="state.email"
+        class="text-xl"
+      />
     </UFormField>
 
     <UFormField
@@ -77,6 +80,7 @@ onMounted(async () => {
       <UInput
         v-model="state.password"
         type="password"
+        class="text-xl"
       />
     </UFormField>
 

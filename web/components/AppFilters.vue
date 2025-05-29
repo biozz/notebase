@@ -21,7 +21,7 @@ defineShortcuts({
       size="xl"
       variant="outline"
       placeholder="Query"
-      class="w-full"
+      class="w-full text-xl"
       autocapitalize="none"
       autocorrect="off"
     >
@@ -59,7 +59,7 @@ defineShortcuts({
       color="neutral"
       variant="outline"
       placeholder="inbox/activities/%"
-      class="ios-zoom-fix"
+      class="text-xl"
       autocapitalize="none"
       autocorrect="off"
     />
@@ -80,15 +80,9 @@ defineShortcuts({
       color="neutral"
       variant="outline"
       placeholder="debt"
-      class="ios-zoom-fix"
+      class="text-xl"
       autocapitalize="none"
       autocorrect="off"
     />
   </UButtonGroup>
 </template>
-
-<style lang="css" scoped>
-.ios-zoom-fix {
-  font-size: 16px;
-}
-</style>
