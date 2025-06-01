@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import { onMounted, reactive } from 'vue'
 import { navigateTo } from '#app'
-import { definePageMeta, useClient, useToast } from '#imports'
+import { definePageMeta, shallowRef, useClient, useToast } from '#imports'
 
 definePageMeta({
   layout: 'empty',
@@ -13,23 +13,13 @@ const state = reactive({
   isLoading: false,
 })
 
+const isAuthorized = shallowRef(false)
+
 const pb = useClient()
-
-const isAuthorized = defineModel('isAuthorized', {
-  type: Boolean,
-  default: false,
-})
-
-async function setAuthorized(value: boolean) {
-  if (!value) {
-    await pb.clearAuth()
-  }
-  isAuthorized.value = value
-}
 
 const toast = useToast()
 
-const onSubmit = async () => {
+const onSignIn = async () => {
   if (!state.email || !state.password) {
     toast.add({
       title: 'Authentication Required',
@@ -43,7 +33,7 @@ const onSubmit = async () => {
 
   try {
     await pb.authenticatedUser({ email: state.email, password: state.password })
-    setAuthorized(true)
+    isAuthorized.value = true
     if (await pb.isAuthenticated()) {
       await navigateTo({ name: 'index' })
     }
@@ -60,9 +50,14 @@ const onSubmit = async () => {
   }
 }
 
+const onSignOut = async () => {
+  await pb.clearAuth()
+  isAuthorized.value = false
+}
+
 onMounted(async () => {
   if (await pb.isAuthenticated()) {
-    setAuthorized(true)
+    isAuthorized.value = true
   }
 })
 </script>
@@ -81,16 +76,17 @@ onMounted(async () => {
           <h1 class="text-3xl font-bold  mb-2">
             Notebase
           </h1>
-          <p class="text-dimmed text-balance">
-            Welcome back! Please sign in to continue.
-          </p>
         </div>
 
         <UForm
+          v-if="!isAuthorized"
           :state="state"
           class="space-y-6"
-          @submit="onSubmit"
+          @submit="onSignIn"
         >
+          <p class="text-dimmed text-balance">
+            Welcome back! Please sign in to continue.
+          </p>
           <UFormField
             label="Email Address"
             name="email"
@@ -119,20 +115,6 @@ onMounted(async () => {
             />
           </UFormField>
 
-          <div class="flex items-center justify-between text-sm">
-            <label class="flex items-center">
-              <UCheckbox
-                type="checkbox"
-              />
-              <span class="ml-2 text-dimmed">Remember me</span>
-            </label>
-            <ULink
-              href="#"
-            >
-              Forgot password?
-            </ULink>
-          </div>
-
           <UButton
             type="submit"
             variant="solid"
@@ -151,6 +133,23 @@ onMounted(async () => {
             </template>
           </UButton>
         </UForm>
+        <div
+          v-else
+          class="space-y-6 text-center"
+        >
+          <p class="text-dimmed text-balance">
+            You are already signed in.
+          </p>
+          <UButton
+            type="submit"
+            class="!bg-gradient-to-r !from-red-500 !to-purple-600 hover:!from-red-600 hover:!to-purple-700 !border-0 !shadow-lg hover:!shadow-xl transition-all duration-200"
+            size="lg"
+            block
+            @click="onSignOut"
+          >
+            Sign out
+          </UButton>
+        </div>
       </UCard>
 
       <p class="text-center text-dimmed text-xs text-balance pt-8">
