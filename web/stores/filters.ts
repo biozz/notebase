@@ -2,6 +2,7 @@ import { defineStore } from 'pinia'
 import { useLocalStorage, useStorage, watchDebounced } from '@vueuse/core'
 import { ref } from 'vue'
 import { useNotebaseConfig } from '#imports'
+import { nanoid } from 'nanoid'
 
 interface Filter {
   id: string
@@ -61,7 +62,7 @@ export const useFiltersStore = defineStore('filters', () => {
   }
 
   function saveFilter() {
-    const id = crypto.randomUUID()
+    const id = nanoid()
     if (!saveFilterLabel.value) {
       return
     }
@@ -85,6 +86,7 @@ export const useFiltersStore = defineStore('filters', () => {
       localFilters.value.push(filter)
       clearForm()
     }
+    notebaseConfig.setShowFilters(false)
     return filter
   }
 
@@ -98,7 +100,7 @@ export const useFiltersStore = defineStore('filters', () => {
       return false
     }
 
-    const id = crypto.randomUUID()
+    const id = nanoid()
     const copiedFilter: Filter = {
       id,
       label: `${currentFilter.label} (Copy)`,

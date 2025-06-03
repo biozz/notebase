@@ -7,10 +7,11 @@ import debts from '~/assets/mock/debts.json'
 import tracks from '~/assets/mock/tracks.json'
 import withContent from '~/assets/mock/withContent.json'
 import PocketBase from 'pocketbase'
+import { nanoid } from 'nanoid'
 
 const createDefaultReturn = () => {
   const defaultReturn: RecordModel = {
-    id: crypto.randomUUID().toString(),
+    id: nanoid(),
     collectionId: 'pbc_boba',
     collectionName: 'files',
     path: '',
