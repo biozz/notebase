@@ -8,7 +8,7 @@ interface NotebaseConfig {
 }
 const DEFAULT_DATE_LOCALE = 'en-CA'
 const DEFAULT_SHOW_FILTERS = false
-const DEFAULT_SHOW_EXTRA = false
+const DEFAULT_SHOW_EXTRA = true
 const DEFAULT_SHOW_TABS_SORTING = false
 
 const DEFAULT_CONFIG: NotebaseConfig = {

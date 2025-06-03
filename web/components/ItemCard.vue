@@ -20,7 +20,7 @@ export interface ItemCardProps {
 <script lang="ts" setup>
 import { computed } from 'vue'
 import type { ItemRecord } from '#pocketbase-imports'
-import { toggleItem, useDateFormatter } from '#imports'
+import { toggleItem, useDateFormatter, useNotebaseConfig } from '#imports'
 
 const {
   item,
@@ -28,6 +28,8 @@ const {
   icon = 'i-lucide-notebook-pen',
   compact,
 } = defineProps<ItemCardProps>()
+
+const notebaseConfig = useNotebaseConfig()
 
 const emits = defineEmits<{
   'toggle-completed': [item: ItemRecord]
@@ -94,7 +96,10 @@ function handleToggleDone(item: ItemRecord) {
     >
       created: <span>{{ formattedCreatedDate }}</span>
     </p>
-    <div class="py-4">
+    <div
+      v-if="notebaseConfig.config.value.showExtra"
+      class="py-4"
+    >
       <slot />
     </div>
   </UCard>

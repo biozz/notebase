@@ -29,10 +29,6 @@ const { state, error, asyncStatus } = useActivitiesListQuery()
         </template>
       </UCollapsible>
     </div>
-    <div v-if="notebaseConfig.config.value.showExtra">
-      extra
-    </div>
-
     <div
       v-if="state.status !== 'success' || asyncStatus === 'loading'"
       class="py-2"
