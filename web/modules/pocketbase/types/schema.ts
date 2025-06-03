@@ -71,6 +71,14 @@ export const recordSchema = z.object({
   frontmatter: z.nullish(frontmatterSchema),
 })
 
+export const activityFilterSchema = z.object({
+  id: z.string(),
+  label: z.string(),
+  filters: z.json(),
+  created: z.string(),
+  updated: z.string(),
+})
+
 export type ItemRecord = z.infer<typeof recordSchema>
 
 export type Frontmatter = z.infer<typeof frontmatterSchema>
@@ -82,3 +90,5 @@ export type TrackFrontmatter = z.infer<typeof trackFrontmatterSchema>
 
 export type GroceriesFrontmatter = z.infer<typeof groceriesFrontmatterSchema>
 export type GroceriesItem = z.infer<typeof groceriesItemSchema>
+
+export type ActivityFilter = z.infer<typeof activityFilterSchema>
