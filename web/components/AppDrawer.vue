@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { navigateTo, useClient, useNotebaseConfig, useUser } from '#imports'
+import { navigateTo, useClient, useNotebaseConfig, useToast, useUser } from '#imports'
 
 import { ref } from 'vue'
 
@@ -9,11 +9,17 @@ const open = ref(false)
 
 const pb = useClient()
 const user = useUser()
+const toast = useToast()
 
 const onLogout = async () => {
   await pb.clearAuth()
   user.value.isAuthenticated = false
   await navigateTo({ name: 'login' })
+}
+
+const restartSync = async () => {
+  await pb.restartSync()
+  toast.add({ title: 'Restart complete' })
 }
 
 const closeSlideover = () => {
@@ -88,6 +94,9 @@ const navigationItems = ref([
         <USeparator class="my-2" />
 
         <div class="flex flex-col gap-2 mt-auto">
+          <UButton @click="restartSync">
+            Restart sync
+          </UButton>
           <UCheckbox
             v-model="notebaseConfig.config.value.showExtra"
             label="Show extra"

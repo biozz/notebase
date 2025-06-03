@@ -47,6 +47,11 @@ export interface BaseClient {
   updateContent: (id: string, data: string) => Promise<void>
 
   /**
+  * Restarts the sync process also clearing the storage and rebuilding it
+   */
+  restartSync: () => Promise<void>
+
+  /**
    * Checks if the current client has valid authentication
    * @returns Promise resolving to authentication status (true/false)
    */
