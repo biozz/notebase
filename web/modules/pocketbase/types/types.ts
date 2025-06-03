@@ -8,6 +8,7 @@ import type {
   ItemRecord,
   GroceriesFrontmatter,
   GroceriesItem,
+  ActivityFilter,
 } from './schema'
 /**
  * Base client interface for database operations
@@ -64,6 +65,28 @@ export interface BaseClient {
    * @returns Promise resolving to auth response with user data
    */
   authenticatedUser: (payload: { email: string, password: string }) => Promise<RecordAuthResponse<RecordModel>>
+
+  /**
+     * Retrieves all filters from the database
+     * @returns Promise resolving to list of all filter records
+     */
+  getFilters: () => Promise<ActivityFilter[]>
+
+  /**
+     * Updates a filter's data by its unique identifier
+     * @param id - The unique identifier of the filter to update
+     * @param data - The new filter data as a string
+     * @returns Promise that resolves when the filter is updated
+     */
+  updateFilter: (id: string, data: string) => Promise<RecordModel>
+
+  /**
+     * Creates a new filter with the specified label
+     * @param label - The label for the new filter
+     * @returns Promise resolving to the created filter record
+     */
+  createFilter: (label: string) => Promise<RecordModel>
+
 }
 
 export type {
@@ -75,4 +98,5 @@ export type {
   ItemRecord,
   GroceriesFrontmatter,
   GroceriesItem,
+  ActivityFilter,
 }

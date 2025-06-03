@@ -75,8 +75,6 @@ export const useActivitiesToggleItemMutation = (
 }
 
 export const useActivitiesAddItemMutation = (opts: { onSuccess?: (item: ItemRecord) => Promise<void> | void }) => {
-  const _pb = useClient()
-
   const { state, mutate } = useMutation({
     key: () => ['activities', 'addItem'], // optional
     mutation: async (item: ItemRecord) => new Promise((resolve, reject) =>
