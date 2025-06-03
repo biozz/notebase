@@ -17,11 +17,7 @@ import type { ItemRecord } from '#pocketbase-imports'
 import { useActivitiesUpdateItemMutation } from '~/composables/queries'
 import { itemTypes } from '~/modules/pocketbase/types/schema'
 
-const props = withDefaults(defineProps<BaseItemProps>(), {
-  compact: false,
-  loading: false,
-  disabled: false,
-})
+const props = defineProps<BaseItemProps>()
 
 const itemType = computed(() => {
   if (Object.keys(itemTypes).includes(props.item?.frontmatter?.type ?? 'none')) {
