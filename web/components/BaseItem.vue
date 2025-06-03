@@ -15,6 +15,7 @@ export interface BaseItemProps {
 import { computed, resolveDynamicComponent } from 'vue'
 import type { ItemRecord } from '#pocketbase-imports'
 import { useActivitiesUpdateItemMutation } from '~/composables/queries'
+import { itemTypes } from '~/modules/pocketbase/types/schema'
 
 const props = withDefaults(defineProps<BaseItemProps>(), {
   compact: false,
@@ -23,7 +24,10 @@ const props = withDefaults(defineProps<BaseItemProps>(), {
 })
 
 const itemType = computed(() => {
-  return props.item?.frontmatter?.type ?? 'none'
+  if (Object.keys(itemTypes).includes(props.item?.frontmatter?.type ?? 'none')) {
+    return props.item?.frontmatter?.type
+  }
+  return itemTypes.none
 })
 
 const itemComponent = computed(() => {
