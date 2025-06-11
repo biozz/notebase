@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 
-import { computed, ref, reactive } from '#imports'
+import { computed, ref, refDebounced } from '#imports'
 import { useFiltersListQuery } from '~/composables/queries/useFiltersQuery'
 import type { ActivityFilter } from '#pocketbase-imports'
 
@@ -38,29 +38,24 @@ function buildQuery(query?: string, filters?: ActivityFilter | undefined) {
 }
 
 export const useFiltersStore = defineStore('filters', () => {
-  const querySearch = reactive<{
-    query: string | undefined
-    queryType: string | undefined
-  }>({
-    query: '',
-    queryType: 'FTS',
-  })
+  const query = ref<string>()
+  const queryType = ref<string>()
   const { state: filtersState } = useFiltersListQuery()
 
   const activeFilterId = ref<string>()
 
-  function setActiveFilterId(id: string | undefined) {
-    activeFilterId.value = id
-  }
+  const debouncedQuery = refDebounced(query, 250)
+
+  const builtQuery = computed(() => {
+    return buildQuery(debouncedQuery.value, activeFilter.value)
+  })
 
   const activeFilter = computed(() => {
     return filtersState.value.data?.find(f => f.id === activeFilterId.value)
   })
-
-  const builtQuery = computed(() => {
-    return buildQuery(querySearch.query, activeFilter.value)
-  })
-
+  function setActiveFilterId(id: string | undefined) {
+    activeFilterId.value = id
+  }
   function clearActiveFilter() {
     setActiveFilterId(undefined)
   }
@@ -69,7 +64,8 @@ export const useFiltersStore = defineStore('filters', () => {
     activeFilter,
     filtersState,
     builtQuery,
-    querySearch,
+    query,
+    queryType,
 
     //
     setActiveFilterId,

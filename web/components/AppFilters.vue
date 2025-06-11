@@ -18,7 +18,7 @@ defineShortcuts({
       <AppDrawer />
       <UInput
         ref="input"
-        v-model="filtersStore.querySearch.query"
+        v-model="filtersStore.query"
         icon="i-lucide-search"
         size="xl"
         variant="outline"
@@ -29,19 +29,19 @@ defineShortcuts({
       >
         <template #trailing>
           <UButton
-            v-if="filtersStore.querySearch.query?.length"
+            v-if="filtersStore.query?.length"
             color="neutral"
             variant="link"
             size="sm"
             icon="i-lucide-circle-x"
             aria-label="Clear input"
-            @click="filtersStore.querySearch.query = ''"
+            @click="filtersStore.query = ''"
           />
           <UKbd value="/" />
         </template>
       </UInput>
       <USelectMenu
-        v-model="filtersStore.querySearch.queryType"
+        v-model="filtersStore.queryType"
         :items="['FTS', 'QL']"
       />
     </UButtonGroup>
