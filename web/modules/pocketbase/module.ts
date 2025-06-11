@@ -38,4 +38,4 @@ declare module '@nuxt/schema' {
   }
 }
 
-export type * from './types/types'
+export * from './types'

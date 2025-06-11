@@ -1,118 +1,171 @@
-<script lang="ts" setup>
-import { UBadge, UButtonGroup, UCheckbox, UInput } from '#components'
-import { ref, useFiltersStore } from '#imports'
+<script lang="ts">
+import { z } from 'zod/v4-mini'
+import type { ActivityFilter } from '~/modules/pocketbase/types/types'
+import { filterTypes } from '~/modules/pocketbase/types/schema'
 
-const filtersStore = useFiltersStore()
-const deleteModal = ref(false)
-function handleDeleteFilter() {
-  const success = filtersStore.deleteFilter(filtersStore.appliedFilterId!)
-  if (!success) {
+export const filterTypePlaceholders: Record<keyof typeof filterTypes, string> = {
+  path: 'inbox/activities/%',
+  type: 'debt',
+}
+
+export const activityFilterFiltersSchema = z.object({
+  type: z.enum(Object.values(filterTypes)),
+  value: z.optional(z.string()),
+  enabled: z.boolean(),
+})
+
+export const formSchema = z.object({
+  label: z.string().check(
+    z.minLength(1),
+  ),
+  filters: z.array(activityFilterFiltersSchema),
+})
+
+export type FilterForm = z.infer<typeof formSchema>
+
+export const defaultFormState = {
+  label: '',
+  filters: [
+    { type: 'path', value: '', enabled: false },
+    { type: 'type', value: '', enabled: false },
+  ],
+} satisfies FilterForm
+</script>
+
+<script lang="ts" setup>
+import type { FormSubmitEvent } from '@nuxt/ui'
+import { ref, watch } from '#imports'
+
+const props = defineProps<{
+  filter?: ActivityFilter
+}>()
+const emits = defineEmits<{
+  'update-filter': [id: string, data: FilterForm]
+  'copy-filter': [data: FilterForm]
+  'delete-filter': [id: string]
+}>()
+
+const formState = ref<FilterForm>(defaultFormState)
+
+function onSubmit(event: FormSubmitEvent<FilterForm>) {
+  console.log(event.data)
+  if (!props.filter?.id) {
     return
   }
-  deleteModal.value = false
+
+  emits('update-filter', props.filter.id, event.data)
 }
+
+function copyFilter(id: string | undefined) {
+  if (!id) {
+    return
+  }
+  emits('copy-filter', formState.value)
+}
+function deleteFilter(id: string | undefined) {
+  if (!id) {
+    return
+  }
+  emits('delete-filter', id)
+}
+
+watch(() => props.filter, (newVal) => {
+  formState.value = {
+    label: newVal?.label || defaultFormState.label,
+    filters: newVal?.filters || defaultFormState.filters,
+  }
+}, { immediate: true })
 </script>
 
 <template>
-  <div class="flex flex-col gap-2 w-full">
-    <UButtonGroup>
-      <UBadge
-        color="neutral"
-        variant="outline"
-        size="lg"
-        label="path"
-      >
-        <UCheckbox v-model="filtersStore.pathFilterEnabled" />
-        path
-      </UBadge>
-      <UInput
-        v-model="filtersStore.pathFilter"
-        color="neutral"
-        variant="outline"
-        placeholder="inbox/activities/%"
-        autocapitalize="none"
-        autocorrect="off"
-        class="w-full"
-      />
-    </UButtonGroup>
-
-    <UButtonGroup>
-      <UBadge
-        color="neutral"
-        variant="outline"
-        size="lg"
-        label="type"
-      >
-        <UCheckbox v-model="filtersStore.typeFilterEnabled" />
-        type
-      </UBadge>
-      <UInput
-        v-model="filtersStore.typeFilter"
-        color="neutral"
-        variant="outline"
-        placeholder="debt"
-        autocapitalize="none"
-        autocorrect="off"
-        class="w-full"
-      />
-    </UButtonGroup>
-    <UButtonGroup>
-      <UInput
-        v-model="filtersStore.saveFilterLabel"
-        placeholder="Filter label"
-        type="text"
-        class="w-full"
-      />
-      <UButton
-        variant="soft"
-        icon="i-lucide-copy"
-        size="lg"
-        :disabled="!filtersStore.appliedFilterId"
-        @click="filtersStore.copyFilter()"
-      />
-      <UButton
-        variant="soft"
-        icon="i-lucide-save"
-        size="lg"
-        :disabled="!filtersStore.saveFilterLabel"
-        @click="filtersStore.saveFilter()"
-      />
-      <UButton
-        variant="soft"
-        color="error"
-        size="lg"
-        :disabled="!filtersStore.appliedFilterId"
-        icon="i-lucide-trash"
-        @click="deleteModal = true"
-      />
-    </UButtonGroup>
-    <UModal
-      v-model:open="deleteModal"
-      :dismissible="false"
+  <UForm
+    :state="formState"
+    :schema="formSchema"
+    class="flex flex-col gap-2 w-full"
+    @submit="onSubmit"
+  >
+    <UForm
+      v-for="filter in formState.filters"
+      :key="filter.type"
+      :state="filter"
+      :schema="activityFilterFiltersSchema"
+      class="flex items-center gap-2 w-full"
     >
-      <template #title>
-        Delete filter
-      </template>
-      <template #description>
-        Are you sure you want to delete this filter?
-      </template>
-      <template #footer>
-        <div class="flex gap-2">
+      <UFormField
+        v-if="false"
+        name="type"
+      >
+        <UInput
+          :model-value="filter.type"
+          disabled
+          class="w-full"
+        />
+      </UFormField>
+
+      <UFormField
+        name="enabled"
+        class="p-1.5 rounded-md"
+        :class="{
+          'bg-elevated/50': filter.enabled,
+        }"
+      >
+        <UCheckbox
+          v-model="filter.enabled"
+          :label="filter.type"
+          size="lg"
+        />
+      </UFormField>
+
+      <UFormField
+        name="value"
+        class="w-full"
+      >
+        <UInput
+          v-model="filter.value"
+          color="neutral"
+          variant="outline"
+          :placeholder="filterTypePlaceholders[filter.type]"
+          autocapitalize="none"
+          autocorrect="off"
+          class="w-full"
+        />
+      </UFormField>
+    </UForm>
+    <div class="flex gap-2 items-start">
+      <UFormField
+        name="label"
+        class="w-full pt-0.5"
+      >
+        <UInput
+          v-model="formState.label"
+          placeholder="Filter label"
+          type="text"
+          class="w-full"
+        />
+      </UFormField>
+      <div>
+        <UButtonGroup>
           <UButton
-            color="neutral"
             variant="soft"
-            @click="deleteModal = false"
-          >
-            Cancel
-          </UButton>
+            icon="i-lucide-copy"
+            size="lg"
+            @click="copyFilter(props.filter?.id)"
+          />
           <UButton
+            variant="soft"
+            icon="i-lucide-save"
+            size="lg"
+            type="submit"
+          />
+          <UButton
+            variant="soft"
             color="error"
-            @click="handleDeleteFilter"
-          >
-            Delete
-          </UButton>
-        </div>
-      </template>
-    </UModal>
-  </div>
+            size="lg"
+            icon="i-lucide-trash"
+            @click="deleteFilter(props.filter?.id)"
+          />
+        </UButtonGroup>
+      </div>
+    </div>
+  </UForm>
 </template>

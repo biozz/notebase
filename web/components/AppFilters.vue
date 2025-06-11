@@ -1,9 +1,12 @@
 <script setup lang="ts">
-import { defineShortcuts, useFiltersStore, useTemplateRef } from '#imports'
+import { defineShortcuts, ref, useTemplateRef } from '#imports'
 
-const filtersStore = useFiltersStore()
+// const filtersStore = useFiltersStore()
 
 const input = useTemplateRef('input')
+
+const query = ref('')
+const queryType = ref('FTS')
 
 defineShortcuts({
   '/': () => {
@@ -18,7 +21,7 @@ defineShortcuts({
       <AppDrawer />
       <UInput
         ref="input"
-        v-model="filtersStore.query"
+        v-model="query"
         icon="i-lucide-search"
         size="xl"
         variant="outline"
@@ -29,19 +32,19 @@ defineShortcuts({
       >
         <template #trailing>
           <UButton
-            v-if="filtersStore.query.length"
+            v-if="query.length"
             color="neutral"
             variant="link"
             size="sm"
             icon="i-lucide-circle-x"
             aria-label="Clear input"
-            @click="filtersStore.query = ''"
+            @click="query = ''"
           />
           <UKbd value="/" />
         </template>
       </UInput>
       <USelectMenu
-        v-model="filtersStore.queryType"
+        v-model="queryType"
         :items="['FTS', 'QL']"
       />
     </UButtonGroup>

@@ -9,6 +9,7 @@ import type {
   GroceriesFrontmatter,
   GroceriesItem,
   ActivityFilter,
+  ActivityFilterFilters,
 } from './schema'
 /**
  * Base client interface for database operations
@@ -78,15 +79,21 @@ export interface BaseClient {
      * @param data - The new filter data as a string
      * @returns Promise that resolves when the filter is updated
      */
-  updateFilter: (id: string, data: string) => Promise<RecordModel>
+  updateFilter: (id: string, data: Partial<ActivityFilter>) => Promise<ActivityFilter>
 
   /**
      * Creates a new filter with the specified label
      * @param label - The label for the new filter
      * @returns Promise resolving to the created filter record
      */
-  createFilter: (label: string) => Promise<RecordModel>
+  createFilter: (label: string, filters?: Partial<ActivityFilterFilters>[]) => Promise<ActivityFilter>
 
+  /**
+     * Deletes a filter by its unique identifier
+     * @param id - The unique identifier of the filter to delete
+     * @returns Promise that resolves when the filter is deleted
+     */
+  deleteFilter: (id: string) => Promise<void>
 }
 
 export type {

@@ -5,12 +5,13 @@ import {
   useQuery,
   useQueryCache,
 } from '#imports'
-import type { ActivityFilter } from '~/modules/pocketbase/types/schema'
+
+import type { ActivityFilter, ActivityFilterFilters } from '~/modules/pocketbase/types/schema'
 
 export const useFiltersListQuery = defineQuery(() => {
   const client = useClient()
 
-  const { state, error, asyncStatus } = useQuery<ActivityFilter[]>({
+  const { state, error, asyncStatus } = useQuery({
     key: () => ['filters'],
     query: async () => {
       return await client.getFilters()
@@ -23,16 +24,16 @@ export const useFiltersListQuery = defineQuery(() => {
 })
 
 export const useFiltersUpdateMutation = (
-  opts: { onSuccess?: (filter: ActivityFilter) => Promise<void> | void } = {},
+  opts: { onSuccess?: (filter: { id: string, data: Partial<ActivityFilter> }) => Promise<void> | void } = {},
 ) => {
   const client = useClient()
   const queryCache = useQueryCache()
 
   const mutation = useMutation({
-    mutation: async ({ id, data }: { id: string, data: string }) =>
+    mutation: async ({ id, data }: { id: string, data: Partial<ActivityFilter> }) =>
       await client.updateFilter(id, data),
     async onSuccess(_data, vars) {
-      await opts.onSuccess?.(_data)
+      await opts.onSuccess?.(vars)
     },
     async onSettled() {
       await queryCache.invalidateQueries({ key: ['filters'], exact: false })
@@ -43,15 +44,15 @@ export const useFiltersUpdateMutation = (
 }
 
 export const useFiltersCreateMutation = (
-  opts: { onSuccess?: (filter: ActivityFilter) => Promise<void> | void } = {},
+  opts: { onSuccess?: (data: ActivityFilter, vars: { label: string, filters?: Partial<ActivityFilterFilters>[] }) => Promise<void> | void } = {},
 ) => {
   const client = useClient()
   const queryCache = useQueryCache()
 
   const mutation = useMutation({
-    mutation: async (label: string) => await client.createFilter(label),
-    async onSuccess(_data, vars) {
-      await opts.onSuccess?.(_data)
+    mutation: async (payload: { label: string, filters?: Partial<ActivityFilterFilters>[] }) => await client.createFilter(payload.label, payload.filters),
+    async onSuccess(data, vars) {
+      await opts.onSuccess?.(data, vars)
     },
     async onSettled() {
       await queryCache.invalidateQueries({ key: ['filters'], exact: false })
@@ -61,23 +62,14 @@ export const useFiltersCreateMutation = (
   return mutation
 }
 
-export const useFiltersCopyMutation = (
-  opts: { onSuccess?: (filter: ActivityFilter) => Promise<void> | void } = {},
-) => {
+export function useFiltersDeleteMutation(opts: { onSuccess?: (id: string) => Promise<void> | void } = {}) {
   const client = useClient()
   const queryCache = useQueryCache()
 
   const mutation = useMutation({
-    mutation: async (filterId: string) => {
-      const filters = await client.getFilters()
-      const filterToCopy = filters.find(f => f.id === filterId)
-      if (!filterToCopy) {
-        throw new Error('Filter not found')
-      }
-      return await client.createFilter(`${filterToCopy.label} (Copy)`)
-    },
-    async onSuccess(_data, vars) {
-      await opts.onSuccess?.(_data)
+    mutation: async (id: string) => await client.deleteFilter(id),
+    async onSuccess(data, vars) {
+      await opts.onSuccess?.(vars)
     },
     async onSettled() {
       await queryCache.invalidateQueries({ key: ['filters'], exact: false })

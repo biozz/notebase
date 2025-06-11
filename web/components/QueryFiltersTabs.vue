@@ -1,67 +1,26 @@
 <script lang="ts" setup>
-import { useNotebaseConfig } from '#imports'
-import { ref, watch, nextTick, useTemplateRef } from 'vue'
+import { ref } from 'vue'
+import { useFiltersCreateMutation } from '~/composables/queries/useFiltersQuery'
 import { useFiltersStore } from '~/stores/filters'
 
 const filtersStore = useFiltersStore()
-const notebaseConfig = useNotebaseConfig()
-const selectedFilterIndx = ref(0)
-const isLoading = ref(false)
-const sortableContainer = useTemplateRef<HTMLElement>('sortableContainer')
-watch(selectedFilterIndx, (newVal) => {
-  newVal = typeof newVal === 'string' ? parseInt(newVal) : newVal
-  isLoading.value = true
-  if (newVal === 0) {
-    filtersStore.clearFilters()
-  }
-  else {
-    filtersStore.applyFilter(filtersStore.localFilters[newVal - 1]!.id)
-  }
-})
-
-function handleFilterMenu(filterId: string) {
-  const isFilterSelected = filtersStore.appliedFilterId === filterId
-  const isMenuOpen = notebaseConfig.config.value.showFilters
-
-  if (isFilterSelected && isMenuOpen) {
-    notebaseConfig.setShowFilters(false)
-  }
-  else {
-    filtersStore.applyFilter(filterId)
-    notebaseConfig.setShowFilters(true)
-  }
+const { mutateAsync: createFilter } = useFiltersCreateMutation()
+async function handleCreateFilter() {
+  const newFilter = await createFilter({ label: `New ${filtersStore.filtersState.data?.length ?? 0 + 1}` })
+  filtersStore.setActiveFilterId(newFilter.id)
 }
 
-async function handleAddFilter() {
-  if (filtersStore.appliedFilterId) {
-    filtersStore.clearFilters()
-  }
-  filtersStore.saveFilterLabel = `New ${filtersStore.localFilters.length + 1}`
-  const newFilter = filtersStore.saveFilter()
-  if (!newFilter) {
-    return
-  }
-  filtersStore.applyFilter(newFilter.id)
-  notebaseConfig.setShowFilters(true)
+const deleteModal = ref(false)
 
-  await nextTick()
-  if (sortableContainer.value) {
-    const filterElement = sortableContainer.value.querySelector(`[data-filter-id="${newFilter.id}"]`)
-    if (filterElement) {
-      const containerRect = sortableContainer.value.getBoundingClientRect()
-      const elementRect = filterElement.getBoundingClientRect()
-      const scrollLeft = sortableContainer.value.scrollLeft + (elementRect.left - containerRect.left) - (containerRect.width / 2) + (elementRect.width / 2)
-
-      sortableContainer.value.scrollTo({
-        left: scrollLeft,
-        behavior: 'smooth',
-      })
-    }
-  }
+const showForm = defineModel<boolean>('form-open')
+function toggleShowForm(id: string | undefined) {
+  filtersStore.setActiveFilterId(id)
+  showForm.value = !showForm.value
 }
-function handleClearFilters() {
-  filtersStore.clearFilters()
-  notebaseConfig.setShowFilters(false)
+
+function handleClearActiveFilter() {
+  filtersStore.clearActiveFilter()
+  showForm.value = false
 }
 </script>
 
@@ -71,52 +30,44 @@ function handleClearFilters() {
       <div class="flex gap-1 items-center bg-(--ui-bg)">
         <UButton
           color="neutral"
-          variant="link"
-          size="xs"
-          icon="i-lucide-arrow-down-up"
-          @click="notebaseConfig.setShowTabsSorting(!notebaseConfig.config.value.showTabsSorting)"
-        />
-        <UButton
-          color="neutral"
-          :variant="
-            !filtersStore.appliedFilterId || !filtersStore.builtQuery
-              ? 'soft'
-              : 'outline'
-          "
+          :variant="!filtersStore.activeFilter ? 'solid' : 'ghost'"
           icon="i-lucide-filter-x"
           block
-          @click="handleClearFilters"
+          @click="handleClearActiveFilter"
         />
       </div>
       <div
         ref="sortableContainer"
         class="scrollable flex items-center w-full overflow-x-auto"
       >
-        <div class="flex gap-2 pl-2 py-1">
-          <template v-if="filtersStore.localFilters.length > 0">
+        <div v-if="filtersStore.filtersState.status === 'pending'">
+          Loading filters...
+        </div>
+        <div
+          v-else-if="filtersStore.filtersState.status === 'success'"
+          class="flex gap-2 pl-2 py-1"
+        >
+          <template v-if="filtersStore.filtersState.data.length > 0">
             <UButtonGroup
-              v-for="filter in filtersStore.localFilters"
+              v-for="filter in filtersStore.filtersState.data"
               :key="filter.id"
               :data-filter-id="filter.id"
               class="rounded-md"
-              :class="filtersStore.appliedFilterId === filter.id ? 'ring-1 ring-primary' : 'ring-inset ring-(--ui-border)'"
             >
               <UButton
                 :label="filter.label"
                 color="neutral"
-                :variant="
-                  filtersStore.appliedFilterId === filter.id ? 'outline' : 'ghost'
-                "
+                :variant="filtersStore.activeFilter?.id === filter.id ? 'solid' : 'ghost'"
                 class="w-full truncate"
-                @click="filtersStore.applyFilter(filter.id)"
+                @click="filtersStore.setActiveFilterId(filter.id)"
               >
                 {{ filter.label }}
               </UButton>
               <UButton
                 color="neutral"
                 variant="ghost"
-                :icon="notebaseConfig.config.value.showFilters && filtersStore.appliedFilterId === filter.id ? 'i-lucide-chevron-up' : 'i-lucide-chevron-down'"
-                @click="handleFilterMenu(filter.id)"
+                :icon="showForm && filtersStore.activeFilter?.id === filter.id ? 'i-lucide-chevron-up' : 'i-lucide-chevron-down'"
+                @click="toggleShowForm(filter.id)"
               />
             </UButtonGroup>
           </template>
@@ -133,10 +84,38 @@ function handleClearFilters() {
           variant="outline"
           block
           icon="i-lucide-plus"
-          @click="handleAddFilter"
+          @click="handleCreateFilter"
         />
       </div>
     </div>
+    <UModal
+      v-model:open="deleteModal"
+      :dismissible="false"
+    >
+      <template #title>
+        Delete filter
+      </template>
+      <template #description>
+        Are you sure you want to delete this filter?
+      </template>
+      <template #footer>
+        <div class="flex gap-2">
+          <UButton
+            color="neutral"
+            variant="soft"
+            @click="deleteModal = false"
+          >
+            Cancel
+          </UButton>
+          <UButton
+            color="error"
+            @click="() => {}"
+          >
+            Delete
+          </UButton>
+        </div>
+      </template>
+    </UModal>
   </div>
 </template>
 

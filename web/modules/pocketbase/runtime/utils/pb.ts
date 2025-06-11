@@ -1,5 +1,6 @@
 import PocketBase, { type ListResult } from 'pocketbase'
 import type { BaseClient, Frontmatter, ItemRecord, ActivityFilter } from '../../types/types'
+import type { ActivityFilterFilters } from '../../types/schema'
 
 export function createPocketBaseClient(url: string): BaseClient {
   const pb = new PocketBase(url)
@@ -36,12 +37,15 @@ export function createPocketBaseClient(url: string): BaseClient {
     return await pb.collection('filters').getFullList()
   }
 
-  const updateFilter = async (id: string, data: string) => {
-    return await pb.collection('filters').update(id, { filters: data })
+  const updateFilter = async (id: string, data: Partial<ActivityFilter>): Promise<ActivityFilter> => {
+    return await pb.collection('filters').update(id, data)
   }
 
-  const createFilter = async (label: string) => {
-    return await pb.collection('filters').create({ label: label })
+  const createFilter = async (label: string, filters?: Partial<ActivityFilterFilters>[]): Promise<ActivityFilter> => {
+    return await pb.collection('filters').create({ label: label, filters: filters })
+  }
+  const deleteFilter = async (id: string): Promise<void> => {
+    await pb.collection('filters').delete(id)
   }
 
   return {
@@ -55,5 +59,6 @@ export function createPocketBaseClient(url: string): BaseClient {
     getFilters,
     updateFilter,
     createFilter,
+    deleteFilter,
   }
 }
