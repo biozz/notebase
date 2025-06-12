@@ -44,7 +44,10 @@ export const useFiltersUpdateMutation = (
 }
 
 export const useFiltersCreateMutation = (
-  opts: { onSuccess?: (data: ActivityFilter, vars: { label: string, filters?: Partial<ActivityFilterFilters>[] }) => Promise<void> | void } = {},
+  opts: {
+    onSuccess?: (data: ActivityFilter, vars: { label: string, filters?: Partial<ActivityFilterFilters>[] }) => Promise<void> | void
+    onSettled?: (data: ActivityFilter | undefined) => Promise<void> | void
+  } = {},
 ) => {
   const client = useClient()
   const queryCache = useQueryCache()
@@ -54,9 +57,11 @@ export const useFiltersCreateMutation = (
     async onSuccess(data, vars) {
       await opts.onSuccess?.(data, vars)
     },
-    async onSettled() {
+    async onSettled(data) {
       await queryCache.invalidateQueries({ key: ['filters'], exact: false })
+      await opts.onSettled?.(data)
     },
+
   })
 
   return mutation

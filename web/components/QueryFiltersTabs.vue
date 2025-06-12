@@ -1,27 +1,22 @@
 <script lang="ts" setup>
-import { ref } from 'vue'
-import { useFiltersCreateMutation } from '~/composables/queries/useFiltersQuery'
-import { useFiltersStore } from '~/stores/filters'
+import { useTemplateRef } from 'vue'
 
+import { useFiltersStore, useQueryFiltersTabs } from '#imports'
+
+const sortableContainer = useTemplateRef('sortableContainer')
 const filtersStore = useFiltersStore()
-const { mutateAsync: createFilter } = useFiltersCreateMutation()
-async function handleCreateFilter() {
-  const newFilter = await createFilter({ label: `New ${filtersStore.filtersState.data?.length ?? 0 + 1}` })
-  filtersStore.setActiveFilterId(newFilter.id)
-}
-
-const deleteModal = ref(false)
-
-const showForm = defineModel<boolean>('form-open')
-function toggleShowForm(id: string | undefined) {
-  filtersStore.setActiveFilterId(id)
-  showForm.value = !showForm.value
-}
-
-function handleClearActiveFilter() {
-  filtersStore.clearActiveFilter()
-  showForm.value = false
-}
+const {
+  showForm,
+  isFilterFormOpen,
+  toggleShowForm,
+  deleteModal,
+  deleteAsyncStatus,
+  handleDeleteFilter,
+  handleUpdateFilter,
+  handleCreateFilter,
+  clearActiveFilter,
+  handleCopyFilter,
+} = useQueryFiltersTabs(sortableContainer)
 </script>
 
 <template>
@@ -33,7 +28,7 @@ function handleClearActiveFilter() {
           :variant="!filtersStore.activeFilter ? 'solid' : 'ghost'"
           icon="i-lucide-filter-x"
           block
-          @click="handleClearActiveFilter"
+          @click="clearActiveFilter"
         />
       </div>
       <div
@@ -88,32 +83,40 @@ function handleClearActiveFilter() {
         />
       </div>
     </div>
+    <UCollapsible
+      :open="isFilterFormOpen"
+    >
+      <template #content>
+        <QueryFilterForm
+          :filter="filtersStore.activeFilter"
+          @update-filter="handleUpdateFilter"
+          @delete-filter="handleDeleteFilter(filtersStore.activeFilter?.id)"
+          @copy-filter="handleCopyFilter"
+        />
+      </template>
+    </UCollapsible>
     <UModal
       v-model:open="deleteModal"
-      :dismissible="false"
+      title="Delete Filter"
+      :description="`Are you sure you want to delete the filter ${filtersStore.activeFilter?.label}?`"
     >
-      <template #title>
-        Delete filter
-      </template>
-      <template #description>
-        Are you sure you want to delete this filter?
-      </template>
       <template #footer>
-        <div class="flex gap-2">
-          <UButton
-            color="neutral"
-            variant="soft"
-            @click="deleteModal = false"
-          >
-            Cancel
-          </UButton>
-          <UButton
-            color="error"
-            @click="() => {}"
-          >
-            Delete
-          </UButton>
-        </div>
+        <UButton
+          color="neutral"
+          variant="outline"
+          :disabled="deleteAsyncStatus === 'loading'"
+          @click="deleteModal = false"
+        >
+          Cancel
+        </UButton>
+        <UButton
+          color="error"
+          :loading="deleteAsyncStatus === 'loading'"
+          :disabled="deleteAsyncStatus === 'loading'"
+          @click="handleDeleteFilter(filtersStore.activeFilter?.id)"
+        >
+          Delete
+        </UButton>
       </template>
     </UModal>
   </div>
