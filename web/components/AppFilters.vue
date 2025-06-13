@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { defineShortcuts, useFiltersStore, useTemplateRef } from '#imports'
 
-const filtersStore = useFiltersStore()
-
 const input = useTemplateRef('input')
+
+const filtersStore = useFiltersStore()
 
 defineShortcuts({
   '/': () => {
@@ -29,7 +29,7 @@ defineShortcuts({
       >
         <template #trailing>
           <UButton
-            v-if="filtersStore.query.length"
+            v-if="filtersStore.query?.length"
             color="neutral"
             variant="link"
             size="sm"

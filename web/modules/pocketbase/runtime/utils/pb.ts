@@ -1,5 +1,6 @@
 import PocketBase, { type ListResult } from 'pocketbase'
-import type { BaseClient, Frontmatter, ItemRecord } from '../../types/types'
+import type { BaseClient, Frontmatter, ItemRecord, ActivityFilter } from '../../types/types'
+import type { ActivityFilterFilters } from '../../types/schema'
 
 export function createPocketBaseClient(url: string): BaseClient {
   const pb = new PocketBase(url)
@@ -32,6 +33,21 @@ export function createPocketBaseClient(url: string): BaseClient {
     await pb.collection('files').update(id, { content: data })
   }
 
+  const getFilters = async (): Promise<ActivityFilter[]> => {
+    return await pb.collection('filters').getFullList()
+  }
+
+  const updateFilter = async (id: string, data: Partial<ActivityFilter>): Promise<ActivityFilter> => {
+    return await pb.collection('filters').update(id, data)
+  }
+
+  const createFilter = async (label: string, filters?: Partial<ActivityFilterFilters>[]): Promise<ActivityFilter> => {
+    return await pb.collection('filters').create({ label: label, filters: filters })
+  }
+  const deleteFilter = async (id: string): Promise<void> => {
+    await pb.collection('filters').delete(id)
+  }
+
   return {
     isAuthenticated,
     clearAuth,
@@ -40,5 +56,9 @@ export function createPocketBaseClient(url: string): BaseClient {
     updateContent,
     getList,
     getItem,
+    getFilters,
+    updateFilter,
+    createFilter,
+    deleteFilter,
   }
 }

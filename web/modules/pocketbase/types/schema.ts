@@ -71,6 +71,33 @@ export const recordSchema = z.object({
   frontmatter: z.nullish(frontmatterSchema),
 })
 
+/**
+ * [
+  {id: 'asdf1234', label: 'Debts', filters: [
+    {type: 'path', value: 'inbox/activities/%', enabled: false},
+    {type: 'type', value: 'debt', enabled: true},
+  ]}
+]
+ */
+export const filterTypes = {
+  path: 'path',
+  type: 'type',
+} as const
+
+export const activityFilterFiltersSchema = z.object({
+  type: z.enum(Object.values(filterTypes)),
+  value: z.string(),
+  enabled: z.boolean(),
+})
+
+export const activityFilterSchema = z.object({
+  id: z.string(),
+  label: z.string(),
+  filters: z.nullish(z.array(activityFilterFiltersSchema)),
+  created: z.string(),
+  updated: z.string(),
+})
+
 export type ItemRecord = z.infer<typeof recordSchema>
 
 export type Frontmatter = z.infer<typeof frontmatterSchema>
@@ -82,3 +109,6 @@ export type TrackFrontmatter = z.infer<typeof trackFrontmatterSchema>
 
 export type GroceriesFrontmatter = z.infer<typeof groceriesFrontmatterSchema>
 export type GroceriesItem = z.infer<typeof groceriesItemSchema>
+
+export type ActivityFilter = z.infer<typeof activityFilterSchema>
+export type ActivityFilterFilters = z.infer<typeof activityFilterFiltersSchema>

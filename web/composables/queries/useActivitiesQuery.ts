@@ -23,7 +23,6 @@ export const useActivitiesListQuery = defineQuery(() => {
     },
     staleTime: 1000 * 60 * 5, // 5 minutes
     gcTime: 1000 * 60 * 10, // 10 minutes
-    enabled: () => filtersStore.enabled,
   })
 
   return { state, page, size, error, asyncStatus }
@@ -75,8 +74,6 @@ export const useActivitiesToggleItemMutation = (
 }
 
 export const useActivitiesAddItemMutation = (opts: { onSuccess?: (item: ItemRecord) => Promise<void> | void }) => {
-  const _pb = useClient()
-
   const { state, mutate } = useMutation({
     key: () => ['activities', 'addItem'], // optional
     mutation: async (item: ItemRecord) => new Promise((resolve, reject) =>

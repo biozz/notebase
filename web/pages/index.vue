@@ -1,34 +1,18 @@
 <script setup lang="ts">
-import { UCollapsible } from '#components'
-import { definePageMeta, useNotebaseConfig } from '#imports'
+import { definePageMeta } from '#imports'
 import { useActivitiesListQuery } from '~/composables/queries/'
 
 definePageMeta({
   middleware: ['auth'],
 })
-const notebaseConfig = useNotebaseConfig()
+
 const { state, error, asyncStatus } = useActivitiesListQuery()
 </script>
 
 <template>
   <div class="flex flex-col">
     <QueryFiltersTabs />
-    <div class="pt-2 flex flex-col gap-2">
-      <UCollapsible
-        :open="notebaseConfig.config.value.showTabsSorting"
-      >
-        <template #content>
-          <QueryFiltersSorting />
-        </template>
-      </UCollapsible>
-      <UCollapsible
-        :open="notebaseConfig.config.value.showFilters"
-      >
-        <template #content>
-          <QueryFilterForm />
-        </template>
-      </UCollapsible>
-    </div>
+    <div class="pt-2 flex flex-col gap-2" />
     <div
       v-if="state.status !== 'success' || asyncStatus === 'loading'"
       class="py-2"
