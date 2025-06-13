@@ -1,7 +1,9 @@
 <script lang="ts" setup>
 import { useTemplateRef } from 'vue'
+import { useDebounceFn } from '@vueuse/core'
 
 import { useFiltersStore, useQueryFiltersTabs } from '#imports'
+import type { FilterForm } from './QueryFilterForm.vue'
 
 const sortableContainer = useTemplateRef('sortableContainer')
 const filtersStore = useFiltersStore()
@@ -17,6 +19,15 @@ const {
   clearActiveFilter,
   handleCopyFilter,
 } = useQueryFiltersTabs(sortableContainer)
+
+const debouncedUpdate = useDebounceFn((data: FilterForm) => {
+  if (!filtersStore.activeFilter?.id) return
+  handleUpdateFilter(filtersStore.activeFilter.id, data)
+}, 500)
+
+function handleUpdate(data: FilterForm) {
+  debouncedUpdate(data)
+}
 </script>
 
 <template>
@@ -47,7 +58,8 @@ const {
               v-for="filter in filtersStore.filtersState.data"
               :key="filter.id"
               :data-filter-id="filter.id"
-              class="rounded-md"
+              class="rounded-md border border-(--ui-border)"
+              :class="filtersStore.activeFilter?.id === filter.id ? 'border-primary' : ''"
             >
               <UButton
                 :label="filter.label"
@@ -92,6 +104,7 @@ const {
           @update-filter="handleUpdateFilter"
           @delete-filter="handleDeleteFilter(filtersStore.activeFilter?.id)"
           @copy-filter="handleCopyFilter"
+          @update="handleUpdate"
         />
       </template>
     </UCollapsible>

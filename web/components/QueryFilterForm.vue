@@ -33,8 +33,7 @@ export const defaultFormState = {
 </script>
 
 <script lang="ts" setup>
-import type { FormSubmitEvent } from '@nuxt/ui'
-import { ref, watch } from '#imports'
+import { ref, watch, nextTick, useTemplateRef } from '#imports'
 
 const props = defineProps<{
   filter?: ActivityFilter
@@ -43,18 +42,21 @@ const emits = defineEmits<{
   'update-filter': [id: string, data: FilterForm]
   'copy-filter': [data: FilterForm]
   'delete-filter': [id: string]
+  'update': [data: FilterForm]
 }>()
 
+const formRef = useTemplateRef('form')
 const formState = ref<FilterForm>(defaultFormState)
+const isUpdatingFromProps = ref(false)
 
-function onSubmit(event: FormSubmitEvent<FilterForm>) {
-  console.log(event.data)
-  if (!props.filter?.id) {
-    return
+watch(formState, async (newVal) => {
+  if (!isUpdatingFromProps.value) {
+    const validationResult = await formRef.value?.validate({ silent: true })
+    if (validationResult !== false) {
+      emits('update', newVal)
+    }
   }
-
-  emits('update-filter', props.filter.id, event.data)
-}
+}, { deep: true })
 
 function copyFilter(id: string | undefined) {
   if (!id) {
@@ -70,19 +72,23 @@ function deleteFilter(id: string | undefined) {
 }
 
 watch(() => props.filter, (newVal) => {
+  isUpdatingFromProps.value = true
   formState.value = {
     label: newVal?.label || defaultFormState.label,
     filters: newVal?.filters || defaultFormState.filters,
   }
+  nextTick(() => {
+    isUpdatingFromProps.value = false
+  })
 }, { immediate: true })
 </script>
 
 <template>
   <UForm
+    ref="form"
     :state="formState"
     :schema="formSchema"
     class="flex flex-col gap-2 w-full"
-    @submit="onSubmit"
   >
     <UForm
       v-for="filter in formState.filters"
@@ -150,12 +156,6 @@ watch(() => props.filter, (newVal) => {
             icon="i-lucide-copy"
             size="lg"
             @click="copyFilter(props.filter?.id)"
-          />
-          <UButton
-            variant="soft"
-            icon="i-lucide-save"
-            size="lg"
-            type="submit"
           />
           <UButton
             variant="soft"
