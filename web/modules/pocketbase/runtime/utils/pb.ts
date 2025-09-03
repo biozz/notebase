@@ -32,6 +32,10 @@ export function createPocketBaseClient(url: string): BaseClient {
     await pb.collection('files').update(id, { content: data })
   }
 
+  const restartSync = async () => {
+    await pb.send('/sync/restart', {})
+  }
+
   return {
     isAuthenticated,
     clearAuth,
@@ -40,5 +44,6 @@ export function createPocketBaseClient(url: string): BaseClient {
     updateContent,
     getList,
     getItem,
+    restartSync,
   }
 }
